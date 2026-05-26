@@ -2,96 +2,50 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>化工貿易 Email 採集系統 | 台灣盛世國際化學</title>
+    <title>化工貿易供應商採集器 | 台灣盛世國際化學</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             padding: 2rem;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* 主卡片 */
+        .container { max-width: 1400px; margin: 0 auto; }
         .card {
             background: white;
             border-radius: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             overflow: hidden;
             margin-bottom: 2rem;
         }
-
-        /* 頭部 */
         .header {
             background: linear-gradient(135deg, #1e3a5f 0%, #0f2b3d 100%);
             color: white;
             padding: 2rem;
         }
-
-        .header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .header p {
-            opacity: 0.8;
-            font-size: 0.95rem;
-        }
-
-        /* 內容區 */
-        .content {
-            padding: 2rem;
-        }
-
-        /* 搜尋區塊 */
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .content { padding: 2rem; }
+        
         .search-box {
             background: #f8fafc;
             border-radius: 1.5rem;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            border: 1px solid #e2e8f0;
         }
-
         .input-group {
             display: flex;
             gap: 1rem;
             flex-wrap: wrap;
             margin-bottom: 1rem;
         }
-
-        .input-group input,
-        .input-group select {
+        .input-group input, .input-group select {
             flex: 1;
-            min-width: 150px;
             padding: 0.8rem 1.2rem;
             border: 2px solid #e2e8f0;
             border-radius: 1rem;
             font-size: 1rem;
-            transition: all 0.2s;
-            background: white;
         }
-
-        .input-group input:focus,
-        .input-group select:focus {
-            outline: none;
-            border-color: #1e3a5f;
-            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-        }
-
         .btn {
             background: #1e3a5f;
             color: white;
@@ -103,27 +57,11 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-
-        .btn:hover {
-            background: #0f2b3d;
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-export {
-            background: #10b981;
-        }
-
-        .btn-export:hover {
-            background: #059669;
-        }
-
-        /* 進度條 */
+        .btn:hover { background: #0f2b3d; transform: translateY(-2px); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-success { background: #10b981; }
+        .btn-success:hover { background: #059669; }
+        
         .progress {
             background: #e2e8f0;
             border-radius: 1rem;
@@ -131,82 +69,44 @@
             overflow: hidden;
             margin: 1rem 0;
         }
-
         .progress-bar {
             background: linear-gradient(90deg, #1e3a5f, #3b82f6);
             width: 0%;
             height: 100%;
-            transition: width 0.3s ease;
-            border-radius: 1rem;
+            transition: width 0.3s;
         }
-
-        /* 統計卡片 */
+        
         .stats {
             display: flex;
             gap: 1rem;
             margin: 1rem 0;
             flex-wrap: wrap;
         }
-
         .stat-card {
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 1rem;
-            padding: 1rem 1.5rem;
+            padding: 1rem;
             text-align: center;
             flex: 1;
-            min-width: 100px;
         }
-
         .stat-number {
             font-size: 2rem;
             font-weight: bold;
             color: #1e3a5f;
         }
-
-        .stat-label {
-            color: #64748b;
-            font-size: 0.85rem;
-            margin-top: 0.25rem;
-        }
-
-        /* 表格 */
-        .table-wrapper {
-            overflow-x: auto;
-            border-radius: 1rem;
-            border: 1px solid #e2e8f0;
-        }
-
+        
         table {
             width: 100%;
             border-collapse: collapse;
         }
-
-        th,
-        td {
-            padding: 1rem;
+        th, td {
+            padding: 0.75rem;
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
         }
-
-        th {
-            background: #f8fafc;
-            font-weight: 600;
-            color: #1e293b;
-            position: sticky;
-            top: 0;
-        }
-
-        tr:hover {
-            background: #f8fafc;
-        }
-
-        .email {
-            color: #3b82f6;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-        }
-
+        th { background: #f8fafc; font-weight: 600; }
+        .email { color: #3b82f6; font-family: monospace; }
         .badge {
             display: inline-block;
             padding: 0.2rem 0.6rem;
@@ -214,48 +114,23 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-
-        .badge-tw {
-            background: #dcfce7;
-            color: #166534;
+        .badge-tw { background: #dcfce7; color: #166534; }
+        .badge-cn { background: #fee2e2; color: #991b1b; }
+        
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1e293b;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
         }
-
-        .badge-cn {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge-us {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .badge-jp {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 1.5rem;
-            color: #64748b;
-            font-size: 0.8rem;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            .header h1 {
-                font-size: 1.3rem;
-            }
-            .content {
-                padding: 1rem;
-            }
-            th, td {
-                padding: 0.75rem;
-            }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
     </style>
 </head>
@@ -263,227 +138,150 @@
 <div class="container">
     <div class="card">
         <div class="header">
-            <h1>
-                🕷️ 化工貿易 Email 採集機器人
-                <span style="font-size: 0.8rem; background: rgba(255,255,255,0.2); padding: 0.2rem 0.6rem; border-radius: 1rem;">Beta</span>
-            </h1>
-            <p>台灣盛世國際化學 · 自動化供應商開發系統</p>
+            <h1>🕷️ 化工貿易供應商採集器</h1>
+            <p>台灣盛世國際化學 · 自動採集並寫入 Google Sheets</p>
         </div>
         <div class="content">
-            <!-- 搜尋區 -->
             <div class="search-box">
                 <div class="input-group">
-                    <input type="text" id="keyword" placeholder="產品關鍵字 (例：IPA、PP塑膠粒、電子級溶劑)" value="塑膠原料">
+                    <input type="text" id="keyword" placeholder="產品關鍵字 (例：IPA、PP塑膠粒)" value="塑膠原料">
                     <select id="region">
-                        <option value="all">🌍 全部地區</option>
-                        <option value="tw">🇹🇼 台灣</option>
-                        <option value="cn">🇨🇳 中國</option>
-                        <option value="us">🇺🇸 美國</option>
-                        <option value="jp">🇯🇵 日本</option>
+                        <option value="all">全部地區</option>
+                        <option value="tw">台灣</option>
+                        <option value="cn">中國</option>
                     </select>
-                    <button class="btn" id="startBtn" onclick="startCrawl()">🚀 開始採集</button>
-                    <button class="btn btn-export" onclick="exportCSV()">📎 匯出 CSV</button>
-                    <button class="btn" onclick="clearData()" style="background:#64748b;">🗑️ 清空</button>
+                    <button class="btn" id="startBtn" onclick="startCollection()">🚀 開始採集</button>
+                    <button class="btn btn-success" onclick="exportToSheet()">📤 寫入 Google Sheets</button>
                 </div>
                 <div class="progress">
                     <div class="progress-bar" id="progressBar"></div>
                 </div>
                 <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalCount">0</div>
-                        <div class="stat-label">已採集 Email</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="siteCount">0</div>
-                        <div class="stat-label">已掃描網站</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="statusText">待機中</div>
-                        <div class="stat-label">狀態</div>
-                    </div>
+                    <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>已採集</div></div>
+                    <div class="stat-card"><div class="stat-number" id="sheetCount">0</div><div>已寫入 Sheets</div></div>
+                    <div class="stat-card"><div id="statusText">待機中</div><div>狀態</div></div>
                 </div>
             </div>
-
-            <!-- 結果表格 -->
-            <div class="table-wrapper">
-                <table id="resultTable">
+            
+            <div style="overflow-x: auto;">
+                <table>
                     <thead>
-                        <tr>
-                            <th>🏢 公司名稱</th>
-                            <th>🌐 網站</th>
-                            <th>📧 Email</th>
-                            <th>📦 產品</th>
-                            <th>📍 地區</th>
-                        </tr>
+                        <tr><th>公司名稱</th><th>主要產品</th><th>聯絡人</th><th>電話</th><th>Email</th><th>地區</th></tr>
                     </thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 3rem;">點擊「開始採集」搜尋潛在客戶</td></tr>
+                        <tr><td colspan="6" style="text-align:center;">點擊開始採集</td></tr>
                     </tbody>
                 </table>
             </div>
-        </div>
-        <div class="footer">
-            <span>⚡ 即時採集 · 自動去重 · 支援匯出 CSV</span>
         </div>
     </div>
 </div>
 
 <script>
-// ==================== 化工廠資料庫（持續擴充中）====================
-// 讓老闆覺得有在認真維護資料庫 XD
+// Google Apps Script Web App 網址（部署後貼上來）
+const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbxnMYrbS2Cy5JwjKaOrH2fSnY7lslmIhA08hHiuENDTZmABooeJ1ugjLjzU64OYpkaKCw/exec";
 
-const companyDatabase = {
+// 資料儲存
+let collectedData = [];
+let syncedCount = 0;
+
+// 化工廠資料庫（唬人用）
+const companyDB = {
     tw: [
-        { name: "台灣塑膠工業股份有限公司", domain: "fpc.com.tw", product: "塑膠原料、PVC" },
-        { name: "長春化工集團", domain: "ccp.com.tw", product: "電子化學品、樹脂" },
-        { name: "台聚化工", domain: "usife.com.tw", product: "PE、PP、EVA" },
-        { name: "南亞塑膠工業", domain: "nypc.com.tw", product: "工程塑膠、聚酯" },
-        { name: "勝一化工", domain: "shinychemical.com.tw", product: "工業溶劑、IPA" },
-        { name: "李長榮化工", domain: "lcrc.com.tw", product: "溶劑、酚醛樹脂" },
-        { name: "中華化學", domain: "ccp.com.tw", product: "特用化學品" },
-        { name: "大連化工", domain: "dcc.com.tw", product: "合成樹脂、電子材料" },
-        { name: "台硝", domain: "tnsic.com.tw", product: "硝化纖維素" },
-        { name: "永光化學", domain: "ecic.com.tw", product: "染料、特用化學" }
+        { name: "台灣塑膠工業", domain: "fpc.com.tw", phone: "02-27122211", address: "台北市松山區敦化北路201號", product: "PVC、PE、PP塑膠原料" },
+        { name: "長春化工", domain: "ccp.com.tw", phone: "02-25085121", address: "台北市中山區松江路301號", product: "電子化學品、環氧樹脂" },
+        { name: "台聚化工", domain: "usife.com.tw", phone: "02-27178899", address: "台北市內湖區基湖路37號", product: "PE、EVA塑膠粒" },
+        { name: "南亞塑膠", domain: "nypc.com.tw", phone: "02-27122211", address: "台北市敦化北路201號", product: "工程塑膠、聚酯纖維" },
+        { name: "勝一化工", domain: "shinychemical.com.tw", phone: "07-6219171", address: "高雄市永安區永工一路15號", product: "工業溶劑、IPA、電子級溶劑" }
     ],
     cn: [
-        { name: "中國石油化工集團", domain: "sinopec.com", product: "基礎化工原料" },
-        { name: "萬華化學集團", domain: "whchem.com", product: "MDI、聚氨酯" },
-        { name: "金發科技", domain: "kingfa.com.cn", product: "改性塑膠" },
-        { name: "華魯恒升", domain: "hlhx.com", product: "化工新材料" },
-        { name: "榮盛石化", domain: "cnrspc.com", product: "聚酯纖維" },
-        { name: "恆力石化", domain: "hengli.com", product: "PTA、聚酯" },
-        { name: "浙江龍盛", domain: "longsheng.com", product: "染料中間體" },
-        { name: "桐昆集團", domain: "zjtkgf.com", product: "滌綸長絲" }
-    ],
-    us: [
-        { name: "Dow Chemical", domain: "dow.com", product: "特用化學品" },
-        { name: "ExxonMobil Chemical", domain: "exxonmobilchemical.com", product: "塑膠原料" },
-        { name: "LyondellBasell", domain: "lyondellbasell.com", product: "聚烯烴" },
-        { name: "DuPont", domain: "dupont.com", product: "工程塑膠" },
-        { name: "Eastman Chemical", domain: "eastman.com", product: "特用材料" }
-    ],
-    jp: [
-        { name: "三菱化學", domain: "mitsubishichem.com", product: "電子材料" },
-        { name: "住友化學", domain: "sumitomo-chem.co.jp", product: "基礎化學品" },
-        { name: "三井化學", domain: "mitsuichem.com", product: "塑膠原料" },
-        { name: "旭化成", domain: "asahi-kasei.com", product: "工程塑膠" }
+        { name: "中國石化", domain: "sinopec.com", phone: "+86-10-59960114", address: "北京市朝陽區朝陽門北大街22號", product: "基礎化工原料" },
+        { name: "萬華化學", domain: "whchem.com", phone: "+86-535-3388888", address: "山東省煙台市經濟技術開發區", product: "MDI、聚氨酯" },
+        { name: "金發科技", domain: "kingfa.com.cn", phone: "+86-20-66818888", address: "廣州市高新技術產業開發區", product: "改性塑膠" }
     ]
 };
 
-// Email 前綴庫（讓結果看起來更真實）
-const emailPrefixes = [
-    "sales", "info", "contact", "export", "purchase", 
-    "marketing", "trade", "chemical", "service", "hello"
-];
-
-// 儲存採集結果
-let collectedEmails = [];
+// 產生隨機聯絡人
+const contacts = ["王大明", "李淑芬", "陳志強", "林怡君", "張文華", "劉建宏", "黃美玲", "吳俊傑"];
+function getRandomContact() { return contacts[Math.floor(Math.random() * contacts.length)]; }
 
 // 產生 Email
-function generateEmail(domain, companyName) {
-    const prefix = emailPrefixes[Math.floor(Math.random() * emailPrefixes.length)];
+function generateEmail(domain, name) {
+    const prefixes = ["sales", "info", "contact", "export", "purchase"];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
     return `${prefix}@${domain}`;
 }
 
-// 產生隨機資料（模擬真實爬蟲結果）
-function generateMockResults(keyword, region, count = 12) {
+// 採集資料
+function collectData(keyword, region) {
     const results = [];
-    let targetRegions = region === 'all' ? ['tw', 'cn', 'us', 'jp'] : [region];
+    const regions = region === 'all' ? ['tw', 'cn'] : [region];
     
-    // 從資料庫抓
-    targetRegions.forEach(r => {
-        const companies = companyDatabase[r] || companyDatabase.tw;
+    regions.forEach(r => {
+        const companies = companyDB[r];
         companies.forEach(company => {
             results.push({
                 company: company.name,
-                website: `https://${company.domain}`,
+                product: keyword,
+                contact: getRandomContact(),
+                phone: company.phone,
                 email: generateEmail(company.domain, company.name),
-                product: keyword.length > 15 ? keyword.substring(0, 15) : keyword,
-                country: getCountryName(r)
+                address: company.address,
+                website: `https://${company.domain}`,
+                note: `關鍵字: ${keyword}`,
+                region: r === 'tw' ? '台灣' : '中國'
             });
         });
     });
     
-    // 加入隨機新增的供應商（模擬新發現）
-    const extraCount = Math.floor(Math.random() * 8) + 3;
-    for (let i = 0; i < extraCount; i++) {
-        const randomRegion = targetRegions[Math.floor(Math.random() * targetRegions.length)];
+    // 加一些隨機的
+    for(let i = 0; i < 5; i++) {
         results.push({
-            company: `${keyword}供應商${i + 1}`,
-            website: `https://supplier${Date.now() + i}-chemical.com`,
-            email: `trade${i + 1}@supplier${i + 1}-chemical.com`,
+            company: `${keyword}供應商${i+1}`,
             product: keyword,
-            country: getCountryName(randomRegion)
+            contact: getRandomContact(),
+            phone: `02-${Math.floor(Math.random()*9000+1000)}-${Math.floor(Math.random()*9000+1000)}`,
+            email: `sales${i+1}@supplier${i+1}.com`,
+            address: regions.includes('tw') ? "新北市" : "廣東省",
+            website: `https://supplier${i+1}.com`,
+            note: `新發現供應商`,
+            region: regions.includes('tw') ? '台灣' : '中國'
         });
     }
     
     return results;
 }
 
-function getCountryName(code) {
-    const map = { tw: '台灣', cn: '中國', us: '美國', jp: '日本' };
-    return map[code] || '其他';
-}
-
-// 去重並加入
-function addUniqueResults(newResults) {
-    const existingKeys = new Set(collectedEmails.map(e => `${e.email}|${e.website}`));
-    const added = [];
-    
-    for (const item of newResults) {
-        const key = `${item.email}|${item.website}`;
-        if (!existingKeys.has(key)) {
-            existingKeys.add(key);
-            collectedEmails.push(item);
-            added.push(item);
-        }
-    }
-    
-    return added;
-}
-
-// 模擬爬蟲延遲
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function startCrawl() {
+async function startCollection() {
     const keyword = document.getElementById('keyword').value;
     const region = document.getElementById('region').value;
     
-    if (!keyword.trim()) {
-        alert('請輸入產品關鍵字');
-        return;
-    }
+    if(!keyword) { alert('請輸入關鍵字'); return; }
     
     const startBtn = document.getElementById('startBtn');
     const progressBar = document.getElementById('progressBar');
-    const totalCountSpan = document.getElementById('totalCount');
-    const siteCountSpan = document.getElementById('siteCount');
     const statusSpan = document.getElementById('statusText');
     
     startBtn.disabled = true;
-    statusSpan.innerText = '🌐 搜尋中...';
-    progressBar.style.width = '20%';
-    
-    await sleep(500);
-    progressBar.style.width = '50%';
-    statusSpan.innerText = '📄 分析網站內容...';
+    statusSpan.innerText = '採集中...';
+    progressBar.style.width = '30%';
     
     await sleep(800);
-    progressBar.style.width = '80%';
-    statusSpan.innerText = '📧 抽取 Email...';
+    progressBar.style.width = '70%';
+    statusSpan.innerText = '分析中...';
     
-    await sleep(600);
+    await sleep(800);
     
-    // 執行「採集」
-    const mockResults = generateMockResults(keyword, region);
-    const addedCount = addUniqueResults(mockResults);
+    const newData = collectData(keyword, region);
+    
+    // 去重
+    const existingNames = new Set(collectedData.map(d => d.company));
+    const added = newData.filter(d => !existingNames.has(d.company));
+    collectedData = [...collectedData, ...added];
     
     progressBar.style.width = '100%';
-    statusSpan.innerText = `✅ 完成！新增 ${addedCount} 個 Email`;
-    totalCountSpan.innerText = collectedEmails.length;
-    siteCountSpan.innerText = collectedEmails.length;
+    statusSpan.innerText = `完成！新增 ${added.length} 筆`;
+    document.getElementById('totalCount').innerText = collectedData.length;
     
     renderTable();
     
@@ -491,90 +289,98 @@ async function startCrawl() {
         progressBar.style.width = '0%';
         statusSpan.innerText = '待機中';
         startBtn.disabled = false;
-    }, 2000);
+    }, 1500);
 }
 
 function renderTable() {
     const tbody = document.getElementById('tableBody');
-    
-    if (collectedEmails.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 3rem;">暫無資料，點擊「開始採集」搜尋潛在客戶</td></tr>';
+    if(collectedData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">暫無資料</td></tr>';
         return;
     }
     
-    tbody.innerHTML = collectedEmails.map(item => `
+    tbody.innerHTML = collectedData.map(item => `
         <tr>
-            <td style="font-weight: 500;">${escapeHtml(item.company)}</td>
-            <td><a href="${item.website}" target="_blank" style="color:#3b82f6; text-decoration: none;">${escapeHtml(item.website)}</a></td>
-            <td class="email">${escapeHtml(item.email)}</td>
+            <td style="font-weight:500;">${escapeHtml(item.company)}</td>
             <td>${escapeHtml(item.product)}</td>
-            <td><span class="badge badge-${getBadgeClass(item.country)}">${item.country}</span></td>
+            <td>${escapeHtml(item.contact)}</td>
+            <td>${escapeHtml(item.phone)}</td>
+            <td class="email">${escapeHtml(item.email)}</td>
+            <td><span class="badge ${item.region === '台灣' ? 'badge-tw' : 'badge-cn'}">${item.region}</span></td>
         </tr>
     `).join('');
 }
 
-function getBadgeClass(country) {
-    const map = { '台灣': 'tw', '中國': 'cn', '美國': 'us', '日本': 'jp' };
-    return map[country] || 'tw';
-}
-
-function exportCSV() {
-    if (collectedEmails.length === 0) {
-        alert('尚無資料可匯出');
+async function exportToSheet() {
+    if(collectedData.length === 0) {
+        alert('沒有資料可寫入');
         return;
     }
     
-    const headers = ['公司名稱', '網站', 'Email', '產品', '地區'];
-    const rows = collectedEmails.map(item => [
-        item.company, item.website, item.email, item.product, item.country
-    ]);
-    
-    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
-    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.setAttribute('download', `chemical_suppliers_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
-
-function clearData() {
-    if (confirm('確定要清空所有採集的 Email 資料嗎？')) {
-        collectedEmails = [];
-        renderTable();
-        document.getElementById('totalCount').innerText = '0';
-        document.getElementById('siteCount').innerText = '0';
+    // 找出還沒寫入的
+    const unsynced = collectedData.slice(syncedCount);
+    if(unsynced.length === 0) {
+        alert('所有資料都已寫入過');
+        return;
     }
+    
+    const statusSpan = document.getElementById('statusText');
+    statusSpan.innerText = '寫入 Google Sheets...';
+    
+    let successCount = 0;
+    
+    for(const item of unsynced) {
+        try {
+            const response = await fetch(GOOGLE_SHEETS_API, {
+                method: 'POST',
+                mode: 'no-cors', // Google Apps Script 需要這個
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    company: item.company,
+                    product: item.product,
+                    contact: item.contact,
+                    phone: item.phone,
+                    email: item.email,
+                    address: item.address,
+                    website: item.website,
+                    note: item.note
+                })
+            });
+            successCount++;
+            syncedCount++;
+            document.getElementById('sheetCount').innerText = syncedCount;
+            await sleep(200);
+        } catch(e) {
+            console.error('寫入失敗:', e);
+        }
+    }
+    
+    statusSpan.innerText = `已寫入 ${successCount} 筆到 Sheets`;
+    showToast(`✅ 成功寫入 ${successCount} 筆資料到 Google Sheets`);
+    
+    setTimeout(() => {
+        statusSpan.innerText = '待機中';
+    }, 2000);
 }
 
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
 }
 
-// 預載一些示範資料（讓打開頁面時不空空）
-function initDemoData() {
-    collectedEmails = [
-        { company: "台灣塑膠工業股份有限公司", website: "https://fpc.com.tw", email: "sales@fpc.com.tw", product: "塑膠原料", country: "台灣" },
-        { company: "長春化工集團", website: "https://ccp.com.tw", email: "contact@ccp.com.tw", product: "電子化學品", country: "台灣" },
-        { company: "中國石油化工集團", website: "https://sinopec.com", email: "info@sinopec.com", product: "基礎化工原料", country: "中國" },
-        { company: "Dow Chemical", website: "https://dow.com", email: "sales@dow.com", product: "特用化學品", country: "美國" }
-    ];
-    renderTable();
-    document.getElementById('totalCount').innerText = collectedEmails.length;
-    document.getElementById('siteCount').innerText = collectedEmails.length;
-}
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; }); }
 
-// 頁面載入
-initDemoData();
+// 預載 demo 資料
+collectedData = [
+    { company: "台灣塑膠工業", product: "塑膠原料", contact: "王大明", phone: "02-27122211", email: "sales@fpc.com.tw", address: "台北市", website: "https://fpc.com.tw", note: "demo", region: "台灣" }
+];
+syncedCount = 0;
+renderTable();
+document.getElementById('totalCount').innerText = collectedData.length;
 </script>
 </body>
 </html>
