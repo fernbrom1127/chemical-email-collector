@@ -1,14 +1,14 @@
 name: 化工Email採集器
 
-# 加入這一段：給予寫入權限
+# 給予權限
 permissions:
   contents: write
   pages: write
 
 on:
   schedule:
-    - cron: '0 1 * * 1'
-  workflow_dispatch:
+    - cron: '0 1 * * 1'  # 每週一早上9點（台灣時間）
+  workflow_dispatch:  # 手動觸發
 
 jobs:
   crawl:
@@ -39,5 +39,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./output
           publish_branch: gh-pages
-          # 加上這一行：允許強制推送
           force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
