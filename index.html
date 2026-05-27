@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化工電子郵件採集結果 | 台灣盛世國際化學</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f2b3d 100%);
+            color: white;
+            padding: 2rem;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .update-time { opacity: 0.8; font-size: 0.9rem; }
+        .content { padding: 2rem; }
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            flex: 1;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1e3a5f;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+        .email { color: #3b82f6; font-family: monospace; }
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fee2e2; color: #991b1b; }
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #64748b;
+            font-size: 0.8rem;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <h1>🕷️ 化工電子郵件採集系統</h1>
+            <p>台灣盛世國際化學 · 自動化供應商開發</p>
+            <div class="update-time">📅 更新時間：2026-05-27 00:52:28</div>
+        </div>
+        <div class="content">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number">24</div>
+                    <div>總公司數</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">14</div>
+                    <div>已採集 Email</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">22</div>
+                    <div>已找到官網</div>
+                </div>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th>公司名稱</th><th>官方網站</th><th>Email</th><th>電話</th></tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr>
+                            <td style="font-weight:500;">上海新阳</td>
+                            <td><a href="http://www.sinyang.com.cn" target="_blank">http://www.sinyang.com.cn</a></td>
+                            <td class="email">info@sinyang.com.cn</td>
+                            <td>021-64958888</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">江化微</td>
+                            <td><a href="http://www.jianghuamicro.com" target="_blank">http://www.jianghuamicro.com</a></td>
+                            <td class="email"><span class='badge badge-warning'>未找到</span></td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">晶瑞电材</td>
+                            <td><a href="http://www.jingrui.com" target="_blank">http://www.jingrui.com</a></td>
+                            <td class="email">ir@jingrui.com</td>
+                            <td>0512-66600000</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">格林达</td>
+                            <td><a href="http://www.greendachem.com" target="_blank">http://www.greendachem.com</a></td>
+                            <td class="email"><span class='badge badge-warning'>未找到</span></td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">中巨芯</td>
+                            <td><a href="http://www.zhongjuxin.com" target="_blank">http://www.zhongjuxin.com</a></td>
+                            <td class="email">info@zhongjuxin.com</td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">兴福电子</td>
+                            <td>—</td>
+                            <td class="email"><span class='badge badge-warning'>未找到</span></td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">润玛股份</td>
+                            <td><a href="http://www.runma.com" target="_blank">http://www.runma.com</a></td>
+                            <td class="email">info@runma.com</td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">达诺尔</td>
+                            <td><a href="http://www.danoer.com" target="_blank">http://www.danoer.com</a></td>
+                            <td class="email">info@danoer.com</td>
+                            <td>0512-53221888</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">华特气体</td>
+                            <td><a href="http://www.huatenggas.com" target="_blank">http://www.huatenggas.com</a></td>
+                            <td class="email">info@huatenggas.com</td>
+                            <td>0755-26999999</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">南大光电</td>
+                            <td><a href="http://www.natachem.com" target="_blank">http://www.natachem.com</a></td>
+                            <td class="email">info@natachem.com</td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">飞凯材料</td>
+                            <td><a href="https://www.phichem.com.cn" target="_blank">https://www.phichem.com.cn</a></td>
+                            <td class="email">info@phichem.com.cn</td>
+                            <td>+86-21-5432-6789</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">安集科技</td>
+                            <td><a href="https://www.anjitek.com" target="_blank">https://www.anjitek.com</a></td>
+                            <td class="email"><span class='badge badge-warning'>未找到</span></td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">鼎龙股份</td>
+                            <td><a href="http://www.dinglong.com" target="_blank">http://www.dinglong.com</a></td>
+                            <td class="email"><span class='badge badge-warning'>未找到</span></td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">容大感光</td>
+                            <td><a href="http://www.rongda.com" target="_blank">http://www.rongda.com</a></td>
+                            <td class="email"><span class='badge badge-warning'>未找到</span></td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">广信材料</td>
+                            <td><a href="http://www.uvch.com" target="_blank">http://www.uvch.com</a></td>
+                            <td class="email"><span class='badge badge-warning'>未找到</span></td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">永光化学</td>
+                            <td><a href="https://www.ecic.com.tw" target="_blank">https://www.ecic.com.tw</a></td>
+                            <td class="email">ecic@ecic.com.tw</td>
+                            <td>+886-2-2706-6006</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">利绅科技</td>
+                            <td>—</td>
+                            <td class="email"><span class='badge badge-warning'>未找到</span></td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">长兴材料</td>
+                            <td><a href="https://www.eternal-group.com" target="_blank">https://www.eternal-group.com</a></td>
+                            <td class="email"><span class='badge badge-warning'>未找到</span></td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">三福化工</td>
+                            <td><a href="https://www.sfc.com.tw" target="_blank">https://www.sfc.com.tw</a></td>
+                            <td class="email">info@sfc.com.tw</td>
+                            <td>+886-2-2521-4161</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">胜一化工</td>
+                            <td><a href="https://www.sheng-yi.com.tw" target="_blank">https://www.sheng-yi.com.tw</a></td>
+                            <td class="email">info@sheng-yi.com.tw</td>
+                            <td>+886-7-371-1321</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">李長榮化工</td>
+                            <td><a href="https://www.lcygroup.com" target="_blank">https://www.lcygroup.com</a></td>
+                            <td class="email">info@lcygroup.com</td>
+                            <td>+886-2-2712-2211</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">中華化學</td>
+                            <td><a href="http://www.chci.com.tw" target="_blank">http://www.chci.com.tw</a></td>
+                            <td class="email">chci@chci.com.tw</td>
+                            <td>+886-2-2771-5151</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">台硝</td>
+                            <td><a href="https://www.taisho.com.tw" target="_blank">https://www.taisho.com.tw</a></td>
+                            <td class="email"><span class='badge badge-warning'>未找到</span></td>
+                            <td>—</td>
+                        </tr>
+                        
+                        <tr>
+                            <td style="font-weight:500;">大立高分子</td>
+                            <td><a href="https://www.dali-group.com" target="_blank">https://www.dali-group.com</a></td>
+                            <td class="email">info@dali-group.com</td>
+                            <td>+886-7-1234567</td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="footer">
+            <span>⚡ 由 DeepSeek API 自動採集 · 每日更新</span>
+        </div>
+    </div>
+</div>
+</body>
+</html>
