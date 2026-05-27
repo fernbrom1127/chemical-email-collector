@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣盛世國際化學 - 產業情報戰情室</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .report-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            transition: all 0.2s;
+            border-left: 4px solid;
+        }
+        .report-card.free { border-left-color: #10b981; }
+        .report-card.paid { border-left-color: #f59e0b; }
+        .report-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+        }
+        .report-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+        .report-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.75rem;
+            color: #64748b;
+            flex-wrap: wrap;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .badge-free { background: #dcfce7; color: #166534; }
+        .badge-paid { background: #fef3c7; color: #92400e; }
+        .badge-hot { background: #fee2e2; color: #991b1b; }
+        .report-highlight {
+            font-size: 0.8rem;
+            color: #334155;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+        .report-link {
+            font-size: 0.75rem;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .report-link:hover { text-decoration: underline; }
+        
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #475569;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .report-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📊 產業情報戰情室</h1>
+        <p>台灣盛世國際化學有限公司 · 市場研究與情報中心</p>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number">10</div><div class="stat-label">產業報告</div></div>
+        <div class="stat-card"><div class="stat-number">6</div><div class="stat-label">免費可下載</div></div>
+        <div class="stat-card"><div class="stat-number">2025-26</div><div class="stat-label">最新版本</div></div>
+        <div class="stat-card"><div class="stat-number">🔄</div><div class="stat-label">每週更新</div></div>
+    </div>
+    
+    <div class="section-title">
+        <span>📈</span> 市場研究報告
+    </div>
+    
+    <div class="report-grid">
+        <div class="report-card free">
+            <div class="report-title">Global Plastics Market Research Report 2026</div>
+            <div class="report-meta"><span>📅 2026年3月</span><span>🏢 QY Research</span><span class="badge badge-free">免費下載</span><span class="badge badge-hot">🔥 最新</span></div>
+            <div class="report-highlight">📊 2025年 5456億美元 → 2032年 6918億美元 | CAGR 3.5%</div>
+            <a href="https://www.qyresearch.com/reports/5647687/plastics" target="_blank" class="report-link">🔗 獲取報告 →</a>
+        </div>
+        
+        <div class="report-card free">
+            <div class="report-title">電子化學品市場規模及趨勢報告 2025-2034</div>
+            <div class="report-meta"><span>📅 2025年10月</span><span>🏢 Global Market Insights</span><span class="badge badge-free">免費下載</span><span class="badge badge-hot">🔥 高成長</span></div>
+            <div class="report-highlight">📊 2024年 238億美元 → 2034年 709億美元 | CAGR 11.5%</div>
+            <div class="report-highlight">🏆 默克市占率 12% 領先，前五大廠合占 41%</div>
+            <a href="https://www.gminsights.com/industry-analysis/electronic-chemicals-market" target="_blank" class="report-link">🔗 獲取報告 →</a>
+        </div>
+        
+        <div class="report-card free">
+            <div class="report-title">Electronic Chemicals and Materials Market 2026-2035</div>
+            <div class="report-meta"><span>📅 2026年5月</span><span>🏢 Expert Market Research</span><span class="badge badge-free">免費下載</span></div>
+            <div class="report-highlight">📊 2025年 676.8億美元 → 2035年 1200.7億美元 | CAGR 5.9%</div>
+            <div class="report-highlight">🌏 亞太區 CAGR 6.8% (印度7.8%、中國6.5%)</div>
+            <a href="https://www.expertmarketresearch.com/reports/electronic-chemicals-and-materials-market" target="_blank" class="report-link">🔗 獲取報告 →</a>
+        </div>
+        
+        <div class="report-card free">
+            <div class="report-title">Global Plastic Raw Material Market 2026</div>
+            <div class="report-meta"><span>📅 2026年3月</span><span>🏢 QY Research</span><span class="badge badge-free">免費下載</span></div>
+            <div class="report-highlight">📊 2025年 5631億美元 → 2032年 7284億美元 | CAGR 3.8%</div>
+            <div class="report-highlight">🏭 主要廠商：BASF、Dow、SABIC、Covestro、Sinopec、Formosa Plastics</div>
+            <a href="https://www.qyresearch.com/reports/6231368/plastic-raw-material" target="_blank" class="report-link">🔗 獲取報告 →</a>
+        </div>
+        
+        <div class="report-card free">
+            <div class="report-title">BASF Report 2025 - Outlook 2026</div>
+            <div class="report-meta"><span>📅 2026年2月</span><span>🏢 BASF</span><span class="badge badge-free">在線閱讀</span></div>
+            <div class="report-highlight">🌍 2026年全球化工：🇨🇳中國 +4.0% | 🇪🇺歐盟 -0.6% | 🇺🇸美國 -1.0%</div>
+            <div class="report-highlight">💡 中國占全球化工生產 50%</div>
+            <a href="https://report.basf.com/2025/en/combined-managements-report/forecast/outlook.html" target="_blank" class="report-link">🔗 閱讀報告 →</a>
+        </div>
+        
+        <div class="report-card free">
+            <div class="report-title">2025年全球商品塑料行業總體規模及排名</div>
+            <div class="report-meta"><span>📅 2025年10月</span><span>🏢 QYResearch</span><span class="badge badge-free">免費下載</span></div>
+            <div class="report-highlight">📊 2031年預估 39010億人民幣 | CAGR 2.8%</div>
+            <div class="report-highlight">📦 最大應用：包裝產業</div>
+            <a href="https://www.qyresearch.com.cn/reports/6149085/commodity-plastic" target="_blank" class="report-link">🔗 獲取報告 →</a>
+        </div>
+        
+        <div class="report-card paid">
+            <div class="report-title">2026-2032年中國基礎化工行業市場全景分析報告</div>
+            <div class="report-meta"><span>📅 2025年12月</span><span>🏢 華經產業研究院</span><span class="badge badge-paid">付費 ¥9000</span></div>
+            <div class="report-highlight">📋 包含拜耳、陶氏、杜邦、埃克森美孚、住友化學等標杆企業分析</div>
+            <a href="https://www.huaon.com/channel/chemical/1125911.html" target="_blank" class="report-link">🔗 查看目錄 →</a>
+        </div>
+        
+        <div class="report-card paid">
+            <div class="report-title">2026-2032年中國精細化工行業發展潛力預測報告</div>
+            <div class="report-meta"><span>📅 2025年11月</span><span>🏢 華經產業研究院</span><span class="badge badge-paid">付費 ¥9000</span></div>
+            <div class="report-highlight">📋 包含聯化科技、九九久、安道麥、揚農化工、新安化工等重點企業</div>
+            <a href="https://www.huaon.com/channel/jingpin/pec/1117742.html" target="_blank" class="report-link">🔗 查看目錄 →</a>
+        </div>
+        
+        <div class="report-card free">
+            <div class="report-title">Electronic Chemicals And Materials Market to 2035</div>
+            <div class="report-meta"><span>📅 2026年2月</span><span>🏢 Global Growth Insights</span><span class="badge badge-free">可看目錄</span></div>
+            <div class="report-highlight">📄 111頁完整報告，涵蓋高純度化學品、IC和PCB製造應用</div>
+            <a href="https://www.globalgrowthinsights.com/market-reports/toc/electronic-chemicals-and-materials-market-109982" target="_blank" class="report-link">🔗 查看目錄 →</a>
+        </div>
+        
+        <div class="report-card free">
+            <div class="report-title">Electronic Materials and Chemicals Market to 2034</div>
+            <div class="report-meta"><span>📅 2025年</span><span>🏢 Global Growth Insights</span><span class="badge badge-free">可看摘要</span></div>
+            <div class="report-highlight">📊 2024年 549.9億美元 → 2034年 966.4億美元 | CAGR 5.8%</div>
+            <div class="report-highlight">🏭 半導體需求占 55%+，亞太占 44% 市場份額</div>
+            <a href="https://www.globalgrowthinsights.com/zh/market-reports/electronic-materials-and-chemicals-market-119523" target="_blank" class="report-link">🔗 查看摘要 →</a>
+        </div>
+    </div>
+    
+    <div class="section-title">
+        <span>💡</span> 關鍵洞察（老闆必讀）
+    </div>
+    
+    <div class="report-grid">
+        <div class="report-card free" style="background:#f0fdf4;">
+            <div class="report-title">🎯 電子化學品是未來主力</div>
+            <div class="report-highlight">CAGR 11.5% 的高速成長，是塑膠市場（3.5%）的 3 倍以上</div>
+        </div>
+        <div class="report-card free" style="background:#eff6ff;">
+            <div class="report-title">🌏 亞洲市場持續擴張</div>
+            <div class="report-highlight">中國 +4.0%、印度 +7.8%，歐美衰退，亞洲是我們的機會</div>
+        </div>
+        <div class="report-card free" style="background:#fef3c7;">
+            <div class="report-title">🏭 默克是電子化學品龍頭</div>
+            <div class="report-highlight">市占率 12%，我們找默克代理商的方向正確</div>
+        </div>
+        <div class="report-card free" style="background:#fce7f3;">
+            <div class="report-title">📦 包裝是最大應用市場</div>
+            <div class="report-highlight">大宗塑料的最大應用仍是包裝，可持續開發此領域客戶</div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        📅 資料更新：2026年5月27日 | 🔄 每週更新 | 📊 資料來源：QY Research、BASF、Global Market Insights、Expert Market Research
+    </div>
+</div>
+</body>
+</html>
