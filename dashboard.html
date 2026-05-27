@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化工供應商資料控制台 | 台灣盛世國際化學</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f2b3d 100%);
+            color: white;
+            padding: 2rem;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .header p { opacity: 0.8; }
+        .content { padding: 2rem; }
+        
+        .button-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .btn-primary { background: #1e3a5f; color: white; }
+        .btn-primary:hover { background: #0f2b3d; transform: translateY(-2px); }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; transform: translateY(-2px); }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; transform: translateY(-2px); }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover { background: #d97706; transform: translateY(-2px); }
+        
+        .keyword-section {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .keyword-tag {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 0.3rem 0.8rem;
+            border-radius: 1rem;
+            margin: 0.25rem;
+            font-size: 0.85rem;
+        }
+        .keyword-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .keyword-input-group input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover { background: #f8fafc; }
+        .email { color: #3b82f6; font-family: monospace; }
+        .checkbox-col { width: 30px; text-align: center; }
+        
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1e293b;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .progress {
+            background: #e2e8f0;
+            border-radius: 1rem;
+            height: 0.5rem;
+            overflow: hidden;
+            margin: 1rem 0;
+            display: none;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #1e3a5f, #3b82f6);
+            width: 0%;
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 0.8rem 1.2rem;
+            text-align: center;
+            flex: 1;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1e3a5f;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <h1>🕷️ 化工供應商資料控制台</h1>
+            <p>台灣盛世國際化學 · 爬蟲控制 + 資料審核 + 寫入 Sheets</p>
+        </div>
+        <div class="content">
+            <div class="button-bar">
+                <button class="btn btn-primary" onclick="startCrawl()">🚀 開始爬蟲</button>
+                <button class="btn btn-success" onclick="writeToSheets()">📤 寫入 Google Sheets</button>
+                <button class="btn btn-warning" onclick="clearTempData()">🗑️ 清空暫存</button>
+                <button class="btn" onclick="refreshData()">🔄 重新整理</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>暫存資料</div></div>
+                <div class="stat-card"><div class="stat-number" id="selectedCount">0</div><div>已選取</div></div>
+                <div class="stat-card"><div id="statusText">待機中</div><div>狀態</div></div>
+            </div>
+            
+            <div class="progress" id="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="keyword-section">
+                <div><strong>🔍 搜尋關鍵字</strong></div>
+                <div id="keywordTags"></div>
+                <div class="keyword-input-group">
+                    <input type="text" id="newKeyword" placeholder="輸入新關鍵字，例如：電子級溶劑 供應商">
+                    <button class="btn" onclick="addKeyword()">+ 新增</button>
+                </div>
+            </div>
+            
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="checkbox-col"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                            <th>公司名稱</th><th>主要產品</th><th>聯絡人</th><th>連絡電話</th>
+                            <th>電子信箱</th><th>工廠地址</th><th>公司網址</th><th>備註</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="9" style="text-align:center;">點擊「開始爬蟲」收集資料</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="button-bar" style="margin-top: 1rem;">
+                <button class="btn btn-danger" onclick="deleteSelected()">🗑️ 刪除選取</button>
+                <button class="btn" onclick="selectAll()">☑️ 全選</button>
+                <button class="btn" onclick="deselectAll()">⬜ 取消全選</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== 全域變數 ====================
+let tempData = [];
+let selectedRows = new Set();
+
+// Google Sheets 寫入 API（你的 Apps Script 網址）
+const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbxnMYrbS2Cy5JwjKaOrH2fSnY7lslmIhA08hHiuENDTZmABooeJ1ugjLjzU64OYpkaKCw/exec";
+
+// 預設關鍵字
+let keywords = [
+    "電子化學品 供應商 台灣",
+    "半導體材料 製造商 中國",
+    "濕電子化學品 公司",
+    "電子級溶劑 供應商"
+];
+
+// ==================== 初始化 ====================
+function init() {
+    loadKeywords();
+    loadTempData();
+    refreshData();
+}
+
+function loadKeywords() {
+    const saved = localStorage.getItem('crawl_keywords');
+    if (saved) keywords = JSON.parse(saved);
+    renderKeywords();
+}
+
+function saveKeywords() {
+    localStorage.setItem('crawl_keywords', JSON.stringify(keywords));
+    renderKeywords();
+}
+
+function renderKeywords() {
+    const container = document.getElementById('keywordTags');
+    container.innerHTML = keywords.map(k => 
+        `<span class="keyword-tag">${escapeHtml(k)} <span style="cursor:pointer;" onclick="removeKeyword('${escapeHtml(k)}')">❌</span></span>`
+    ).join('');
+}
+
+function addKeyword() {
+    const input = document.getElementById('newKeyword');
+    const newKeyword = input.value.trim();
+    if (newKeyword && !keywords.includes(newKeyword)) {
+        keywords.push(newKeyword);
+        saveKeywords();
+        input.value = '';
+    }
+}
+
+function removeKeyword(keyword) {
+    keywords = keywords.filter(k => k !== keyword);
+    saveKeywords();
+}
+
+function loadTempData() {
+    const saved = localStorage.getItem('temp_crawl_data');
+    tempData = saved ? JSON.parse(saved) : [];
+}
+
+function saveTempData() {
+    localStorage.setItem('temp_crawl_data', JSON.stringify(tempData));
+    updateStats();
+}
+
+function updateStats() {
+    document.getElementById('totalCount').innerText = tempData.length;
+    document.getElementById('selectedCount').innerText = selectedRows.size;
+}
+
+function refreshData() {
+    renderTable();
+    updateStats();
+}
+
+function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    if (tempData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">暫無資料，點擊「開始爬蟲」收集</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = tempData.map((item, index) => `
+        <tr>
+            <td class="checkbox-col">
+                <input type="checkbox" class="row-checkbox" data-index="${index}" ${selectedRows.has(index) ? 'checked' : ''} onchange="toggleRow(${index})">
+            </td>
+            <td>${escapeHtml(item.company || '')}</td>
+            <td>${escapeHtml(item.product || '')}</td>
+            <td>${escapeHtml(item.contact || '')}</td>
+            <td>${escapeHtml(item.phone || '')}</td>
+            <td class="email">${escapeHtml(item.email || '')}</td>
+            <td>${escapeHtml(item.address || '')}</td>
+            <td>${item.website ? `<a href="${escapeHtml(item.website)}" target="_blank">${escapeHtml(item.website)}</a>` : ''}</td>
+            <td>${escapeHtml(item.note || '')}</td>
+        </tr>
+    `).join('');
+}
+
+function toggleRow(index) {
+    selectedRows.has(index) ? selectedRows.delete(index) : selectedRows.add(index);
+    updateStats();
+}
+
+function selectAll() {
+    for (let i = 0; i < tempData.length; i++) selectedRows.add(i);
+    renderTable();
+    updateStats();
+}
+
+function deselectAll() {
+    selectedRows.clear();
+    renderTable();
+    updateStats();
+}
+
+function toggleSelectAll() {
+    const cb = document.getElementById('selectAll');
+    cb.checked ? selectAll() : deselectAll();
+}
+
+function deleteSelected() {
+    if (selectedRows.size === 0) {
+        showToast('請先選取要刪除的資料');
+        return;
+    }
+    if (confirm(`確定要刪除 ${selectedRows.size} 筆資料嗎？`)) {
+        const newData = [];
+        for (let i = 0; i < tempData.length; i++) {
+            if (!selectedRows.has(i)) newData.push(tempData[i]);
+        }
+        tempData = newData;
+        selectedRows.clear();
+        saveTempData();
+        refreshData();
+        showToast('已刪除選取資料');
+    }
+}
+
+function clearTempData() {
+    if (confirm('確定要清空所有暫存資料嗎？')) {
+        tempData = [];
+        selectedRows.clear();
+        saveTempData();
+        refreshData();
+        showToast('已清空所有暫存資料');
+    }
+}
+
+// ==================== 爬蟲 ====================
+async function startCrawl() {
+    if (keywords.length === 0) {
+        showToast('請先新增搜尋關鍵字');
+        return;
+    }
+    
+    const progressDiv = document.getElementById('progress');
+    const progressBar = document.getElementById('progressBar');
+    const statusSpan = document.getElementById('statusText');
+    
+    progressDiv.style.display = 'block';
+    statusSpan.innerText = '爬蟲執行中...';
+    
+    let allResults = [];
+    
+    for (let i = 0; i < keywords.length; i++) {
+        const keyword = keywords[i];
+        progressBar.style.width = `${(i / keywords.length) * 100}%`;
+        statusSpan.innerText = `搜尋: ${keyword}`;
+        
+        const results = await simulateCrawl(keyword);
+        allResults.push(...results);
+        await sleep(1000);
+    }
+    
+    // 去重
+    const unique = [];
+    const seen = new Set();
+    for (const item of allResults) {
+        const key = item.email || item.website;
+        if (key && !seen.has(key)) {
+            seen.add(key);
+            unique.push(item);
+        }
+    }
+    
+    tempData.push(...unique);
+    saveTempData();
+    refreshData();
+    
+    progressDiv.style.display = 'none';
+    statusSpan.innerText = `完成！新增 ${unique.length} 筆`;
+    showToast(`爬蟲完成，新增 ${unique.length} 筆資料`);
+    
+    setTimeout(() => { statusSpan.innerText = '待機中'; }, 3000);
+}
+
+// 模擬爬蟲（實際要串 DeepSeek API）
+async function simulateCrawl(keyword) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const mockData = [
+                {
+                    company: `${keyword} 供應商 A`,
+                    product: keyword,
+                    contact: '王大明',
+                    phone: '02-12345678',
+                    email: `sales${Math.floor(Math.random()*100)}@example.com`,
+                    address: '桃園市龜山區',
+                    website: 'https://example.com',
+                    note: 'AI 自動採集'
+                },
+                {
+                    company: `${keyword} 製造商 B`,
+                    product: keyword,
+                    contact: '李淑芬',
+                    phone: '03-87654321',
+                    email: `contact${Math.floor(Math.random()*100)}@sample.com`,
+                    address: '新竹科學園區',
+                    website: 'https://sample.com',
+                    note: 'AI 自動採集'
+                }
+            ];
+            resolve(mockData);
+        }, 1500);
+    });
+}
+
+// ==================== 寫入 Google Sheets ====================
+async function writeToSheets() {
+    if (selectedRows.size === 0) {
+        showToast('請先選取要寫入的資料');
+        return;
+    }
+    
+    const toWrite = [];
+    for (const idx of selectedRows) {
+        toWrite.push(tempData[idx]);
+    }
+    
+    if (confirm(`確定要將 ${toWrite.length} 筆資料寫入 Google Sheets 嗎？`)) {
+        const statusSpan = document.getElementById('statusText');
+        statusSpan.innerText = '寫入中...';
+        
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (const item of toWrite) {
+            try {
+                await fetch(GOOGLE_SHEETS_API, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        company: item.company,
+                        product: item.product,
+                        contact: item.contact,
+                        phone: item.phone,
+                        email: item.email,
+                        address: item.address,
+                        website: item.website,
+                        note: item.note
+                    })
+                });
+                successCount++;
+                await sleep(200);
+            } catch(e) {
+                console.error('寫入失敗:', e);
+                failCount++;
+            }
+        }
+        
+        statusSpan.innerText = '待機中';
+        showToast(`✅ 已寫入 ${successCount} 筆到 Google Sheets${failCount > 0 ? `，失敗 ${failCount} 筆` : ''}`);
+        
+        if (successCount > 0 && confirm('已寫入的資料要從暫存中刪除嗎？')) {
+            const newData = [];
+            for (let i = 0; i < tempData.length; i++) {
+                if (!selectedRows.has(i)) newData.push(tempData[i]);
+            }
+            tempData = newData;
+            selectedRows.clear();
+            saveTempData();
+            refreshData();
+        }
+    }
+}
+
+// ==================== 工具函數 ====================
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;';
+    });
+}
+
+// 啟動
+init();
+</script>
+</body>
+</html>
