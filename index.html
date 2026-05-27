@@ -246,7 +246,6 @@
         </div>
     </div>
 </div>
-
 <script>
 // ==================== 全域變數 ====================
 let tempData = [];          // 暫存資料
@@ -289,7 +288,7 @@ function saveKeywords() {
 function renderKeywords() {
     const container = document.getElementById('keywordTags');
     container.innerHTML = keywords.map(k => 
-        `<span class="keyword-tag">${k} <span style="cursor:pointer;" onclick="removeKeyword('${k}')">❌</span></span>`
+        `<span class="keyword-tag">${escapeHtml(k)} <span style="cursor:pointer;" onclick="removeKeyword('${escapeHtml(k)}')">❌</span></span>`
     ).join('');
 }
 
@@ -358,7 +357,7 @@ function renderTable() {
             <td>${escapeHtml(item.phone || '')}</td>
             <td class="email">${escapeHtml(item.email || '')}</td>
             <td>${escapeHtml(item.address || '')}</td>
-            <td>${item.website ? `<a href="${item.website}" target="_blank">${escapeHtml(item.website)}</a>` : ''}</td>
+            <td>${item.website ? `<a href="${escapeHtml(item.website)}" target="_blank">${escapeHtml(item.website)}</a>` : ''}</td>
             <td>${escapeHtml(item.note || '')}</td>
         </tr>
     `).join('');
@@ -418,7 +417,7 @@ function deleteSelected() {
         selectedRows.clear();
         saveTempData();
         refreshData();
-        showToast(`已刪除 ${selectedRows.size} 筆資料`);
+        showToast(`已刪除資料`);
     }
 }
 
@@ -535,26 +534,39 @@ async function writeToSheets() {
         statusSpan.innerText = '寫入中...';
         
         let successCount = 0;
+        let failCount = 0;
+        
         for (const item of toWrite) {
             try {
                 // 實際呼叫 Google Apps Script
-                // await fetch(GOOGLE_SHEETS_API, {
-                //     method: 'POST',
-                //     mode: 'no-cors',
-                //     body: JSON.stringify(item)
-                // });
+                await fetch(GOOGLE_SHEETS_API, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        company: item.company,
+                        product: item.product,
+                        contact: item.contact,
+                        phone: item.phone,
+                        email: item.email,
+                        address: item.address,
+                        website: item.website,
+                        note: item.note
+                    })
+                });
                 successCount++;
                 await sleep(200);
             } catch(e) {
                 console.error('寫入失敗:', e);
+                failCount++;
             }
         }
         
         statusSpan.innerText = '待機中';
-        showToast(`✅ 已寫入 ${successCount} 筆到 Google Sheets`);
+        showToast(`✅ 已寫入 ${successCount} 筆到 Google Sheets${failCount > 0 ? `，失敗 ${failCount} 筆` : ''}`);
         
         // 可選擇刪除已寫入的資料
-        if (confirm('已寫入的資料要從暫存中刪除嗎？')) {
+        if (successCount > 0 && confirm('已寫入的資料要從暫存中刪除嗎？')) {
             const newData = [];
             for (let i = 0; i < tempData.length; i++) {
                 if (!selectedRows.has(i)) {
@@ -570,7 +582,9 @@ async function writeToSheets() {
 }
 
 // ==================== 工具函數 ====================
-function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+function sleep(ms) { 
+    return new Promise(resolve => setTimeout(resolve, ms)); 
+}
 
 function showToast(msg) {
     const toast = document.createElement('div');
@@ -583,7 +597,10 @@ function showToast(msg) {
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
-        return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;';
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
     });
 }
 
