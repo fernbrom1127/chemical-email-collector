@@ -2,7 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>化工貿易供應商採集器 | 台灣盛世國際化學</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化工供應商資料控制台 | 台灣盛世國際化學</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -12,6 +13,8 @@
             padding: 2rem;
         }
         .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* 卡片 */
         .card {
             background: white;
             border-radius: 2rem;
@@ -27,96 +30,101 @@
         .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
         .content { padding: 2rem; }
         
-        .search-box {
-            background: #f8fafc;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .input-group {
+        /* 按鈕區 */
+        .button-bar {
             display: flex;
             gap: 1rem;
+            margin-bottom: 2rem;
             flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-        .input-group input, .input-group select {
-            flex: 1;
-            padding: 0.8rem 1.2rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 1rem;
-            font-size: 1rem;
         }
         .btn {
-            background: #1e3a5f;
-            color: white;
+            padding: 0.8rem 1.5rem;
             border: none;
-            padding: 0.8rem 1.8rem;
             border-radius: 1rem;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            background: #f1f5f9;
+            color: #1e293b;
         }
-        .btn:hover { background: #0f2b3d; transform: translateY(-2px); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-success { background: #10b981; }
-        .btn-success:hover { background: #059669; }
+        .btn-primary {
+            background: #1e3a5f;
+            color: white;
+        }
+        .btn-primary:hover { background: #0f2b3d; transform: translateY(-2px); }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .btn-success:hover { background: #059669; transform: translateY(-2px); }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover { background: #dc2626; transform: translateY(-2px); }
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        .btn-warning:hover { background: #d97706; transform: translateY(-2px); }
         
-        .progress {
-            background: #e2e8f0;
-            border-radius: 1rem;
-            height: 0.8rem;
-            overflow: hidden;
-            margin: 1rem 0;
-        }
-        .progress-bar {
-            background: linear-gradient(90deg, #1e3a5f, #3b82f6);
-            width: 0%;
-            height: 100%;
-            transition: width 0.3s;
-        }
-        
-        .stats {
-            display: flex;
-            gap: 1rem;
-            margin: 1rem 0;
-            flex-wrap: wrap;
-        }
-        .stat-card {
-            background: white;
-            border: 1px solid #e2e8f0;
+        /* 關鍵字區 */
+        .keyword-section {
+            background: #f8fafc;
             border-radius: 1rem;
             padding: 1rem;
-            text-align: center;
-            flex: 1;
+            margin-bottom: 1.5rem;
         }
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #1e3a5f;
+        .keyword-tag {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 0.3rem 0.8rem;
+            border-radius: 1rem;
+            margin: 0.25rem;
+            font-size: 0.85rem;
+        }
+        .keyword-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .keyword-input-group input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
         }
         
+        /* 表格 */
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.85rem;
         }
         th, td {
             padding: 0.75rem;
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
         }
-        th { background: #f8fafc; font-weight: 600; }
-        .email { color: #3b82f6; font-family: monospace; }
-        .badge {
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
+        th {
+            background: #f8fafc;
             font-weight: 600;
+            position: sticky;
+            top: 0;
         }
-        .badge-tw { background: #dcfce7; color: #166534; }
-        .badge-cn { background: #fee2e2; color: #991b1b; }
+        tr:hover { background: #f8fafc; }
+        .email { color: #3b82f6; font-family: monospace; }
+        .checkbox-col { width: 30px; text-align: center; }
         
+        /* 狀態訊息 */
         .toast {
             position: fixed;
             bottom: 2rem;
@@ -132,236 +140,437 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        
+        /* 進度條 */
+        .progress {
+            background: #e2e8f0;
+            border-radius: 1rem;
+            height: 0.5rem;
+            overflow: hidden;
+            margin: 1rem 0;
+            display: none;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #1e3a5f, #3b82f6);
+            width: 0%;
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 0.8rem 1.2rem;
+            text-align: center;
+            flex: 1;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1e3a5f;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="card">
         <div class="header">
-            <h1>🕷️ 化工貿易供應商採集器</h1>
-            <p>台灣盛世國際化學 · 自動採集並寫入 Google Sheets</p>
+            <h1>🕷️ 化工供應商資料控制台</h1>
+            <p>台灣盛世國際化學 · 爬蟲控制 + 資料審核 + 寫入 Sheets</p>
         </div>
         <div class="content">
-            <div class="search-box">
-                <div class="input-group">
-                    <input type="text" id="keyword" placeholder="產品關鍵字 (例：IPA、PP塑膠粒)" value="塑膠原料">
-                    <select id="region">
-                        <option value="all">全部地區</option>
-                        <option value="tw">台灣</option>
-                        <option value="cn">中國</option>
-                    </select>
-                    <button class="btn" id="startBtn" onclick="startCollection()">🚀 開始採集</button>
-                    <button class="btn btn-success" onclick="exportToSheet()">📤 寫入 Google Sheets</button>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-                <div class="stats">
-                    <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>已採集</div></div>
-                    <div class="stat-card"><div class="stat-number" id="sheetCount">0</div><div>已寫入 Sheets</div></div>
-                    <div class="stat-card"><div id="statusText">待機中</div><div>狀態</div></div>
+            <!-- 按鈕區 -->
+            <div class="button-bar">
+                <button class="btn btn-primary" onclick="startCrawl()">🚀 開始爬蟲</button>
+                <button class="btn btn-success" onclick="writeToSheets()">📤 寫入 Google Sheets</button>
+                <button class="btn btn-warning" onclick="clearTempData()">🗑️ 清空暫存</button>
+                <button class="btn" onclick="refreshData()">🔄 重新整理</button>
+            </div>
+            
+            <!-- 統計 -->
+            <div class="stats" id="stats">
+                <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>暫存資料</div></div>
+                <div class="stat-card"><div class="stat-number" id="selectedCount">0</div><div>已選取</div></div>
+                <div class="stat-card"><div id="statusText">待機中</div><div>狀態</div></div>
+            </div>
+            
+            <!-- 進度條 -->
+            <div class="progress" id="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <!-- 關鍵字管理區 -->
+            <div class="keyword-section">
+                <div><strong>🔍 搜尋關鍵字</strong></div>
+                <div id="keywordTags"></div>
+                <div class="keyword-input-group">
+                    <input type="text" id="newKeyword" placeholder="輸入新關鍵字，例如：電子級溶劑 供應商">
+                    <button class="btn" onclick="addKeyword()">+ 新增</button>
                 </div>
             </div>
             
-            <div style="overflow-x: auto;">
-                <table>
+            <!-- 資料表格 -->
+            <div class="table-wrapper">
+                <table id="dataTable">
                     <thead>
-                        <tr><th>公司名稱</th><th>主要產品</th><th>聯絡人</th><th>電話</th><th>Email</th><th>地區</th></tr>
+                        <tr>
+                            <th class="checkbox-col"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                            <th>公司名稱</th>
+                            <th>主要產品</th>
+                            <th>聯絡人</th>
+                            <th>連絡電話</th>
+                            <th>電子信箱</th>
+                            <th>工廠地址</th>
+                            <th>公司網址</th>
+                            <th>備註</th>
+                        </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="6" style="text-align:center;">點擊開始採集</td></tr>
+                        <tr><td colspan="9" style="text-align:center;">點擊「開始爬蟲」收集資料</td></tr>
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- 底部按鈕 -->
+            <div class="button-bar" style="margin-top: 1rem;">
+                <button class="btn btn-danger" onclick="deleteSelected()">🗑️ 刪除選取</button>
+                <button class="btn" onclick="selectAll()">☑️ 全選</button>
+                <button class="btn" onclick="deselectAll()">⬜ 取消全選</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// Google Apps Script Web App 網址（部署後貼上來）
-const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbxnMYrbS2Cy5JwjKaOrH2fSnY7lslmIhA08hHiuENDTZmABooeJ1ugjLjzU64OYpkaKCw/exec";
+// ==================== 全域變數 ====================
+let tempData = [];          // 暫存資料
+let selectedRows = new Set(); // 選取的索引
 
-// 資料儲存
-let collectedData = [];
-let syncedCount = 0;
+// Google Sheets 寫入 API（需要部署 Google Apps Script）
+const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/你的ID/exec";
 
-// 化工廠資料庫（唬人用）
-const companyDB = {
-    tw: [
-        { name: "台灣塑膠工業", domain: "fpc.com.tw", phone: "02-27122211", address: "台北市松山區敦化北路201號", product: "PVC、PE、PP塑膠原料" },
-        { name: "長春化工", domain: "ccp.com.tw", phone: "02-25085121", address: "台北市中山區松江路301號", product: "電子化學品、環氧樹脂" },
-        { name: "台聚化工", domain: "usife.com.tw", phone: "02-27178899", address: "台北市內湖區基湖路37號", product: "PE、EVA塑膠粒" },
-        { name: "南亞塑膠", domain: "nypc.com.tw", phone: "02-27122211", address: "台北市敦化北路201號", product: "工程塑膠、聚酯纖維" },
-        { name: "勝一化工", domain: "shinychemical.com.tw", phone: "07-6219171", address: "高雄市永安區永工一路15號", product: "工業溶劑、IPA、電子級溶劑" }
-    ],
-    cn: [
-        { name: "中國石化", domain: "sinopec.com", phone: "+86-10-59960114", address: "北京市朝陽區朝陽門北大街22號", product: "基礎化工原料" },
-        { name: "萬華化學", domain: "whchem.com", phone: "+86-535-3388888", address: "山東省煙台市經濟技術開發區", product: "MDI、聚氨酯" },
-        { name: "金發科技", domain: "kingfa.com.cn", phone: "+86-20-66818888", address: "廣州市高新技術產業開發區", product: "改性塑膠" }
-    ]
-};
+// 預設關鍵字
+let keywords = [
+    "電子化學品 供應商 台灣",
+    "半導體材料 製造商 中國",
+    "濕電子化學品 公司",
+    "電子級溶劑 供應商"
+];
 
-// 產生隨機聯絡人
-const contacts = ["王大明", "李淑芬", "陳志強", "林怡君", "張文華", "劉建宏", "黃美玲", "吳俊傑"];
-function getRandomContact() { return contacts[Math.floor(Math.random() * contacts.length)]; }
-
-// 產生 Email
-function generateEmail(domain, name) {
-    const prefixes = ["sales", "info", "contact", "export", "purchase"];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    return `${prefix}@${domain}`;
+// ==================== 初始化 ====================
+function init() {
+    loadKeywords();
+    loadTempData();
+    refreshData();
 }
 
-// 採集資料
-function collectData(keyword, region) {
-    const results = [];
-    const regions = region === 'all' ? ['tw', 'cn'] : [region];
-    
-    regions.forEach(r => {
-        const companies = companyDB[r];
-        companies.forEach(company => {
-            results.push({
-                company: company.name,
-                product: keyword,
-                contact: getRandomContact(),
-                phone: company.phone,
-                email: generateEmail(company.domain, company.name),
-                address: company.address,
-                website: `https://${company.domain}`,
-                note: `關鍵字: ${keyword}`,
-                region: r === 'tw' ? '台灣' : '中國'
-            });
-        });
-    });
-    
-    // 加一些隨機的
-    for(let i = 0; i < 5; i++) {
-        results.push({
-            company: `${keyword}供應商${i+1}`,
-            product: keyword,
-            contact: getRandomContact(),
-            phone: `02-${Math.floor(Math.random()*9000+1000)}-${Math.floor(Math.random()*9000+1000)}`,
-            email: `sales${i+1}@supplier${i+1}.com`,
-            address: regions.includes('tw') ? "新北市" : "廣東省",
-            website: `https://supplier${i+1}.com`,
-            note: `新發現供應商`,
-            region: regions.includes('tw') ? '台灣' : '中國'
-        });
+// 載入關鍵字
+function loadKeywords() {
+    const saved = localStorage.getItem('crawl_keywords');
+    if (saved) {
+        keywords = JSON.parse(saved);
     }
-    
-    return results;
+    renderKeywords();
 }
 
-async function startCollection() {
-    const keyword = document.getElementById('keyword').value;
-    const region = document.getElementById('region').value;
-    
-    if(!keyword) { alert('請輸入關鍵字'); return; }
-    
-    const startBtn = document.getElementById('startBtn');
-    const progressBar = document.getElementById('progressBar');
-    const statusSpan = document.getElementById('statusText');
-    
-    startBtn.disabled = true;
-    statusSpan.innerText = '採集中...';
-    progressBar.style.width = '30%';
-    
-    await sleep(800);
-    progressBar.style.width = '70%';
-    statusSpan.innerText = '分析中...';
-    
-    await sleep(800);
-    
-    const newData = collectData(keyword, region);
-    
-    // 去重
-    const existingNames = new Set(collectedData.map(d => d.company));
-    const added = newData.filter(d => !existingNames.has(d.company));
-    collectedData = [...collectedData, ...added];
-    
-    progressBar.style.width = '100%';
-    statusSpan.innerText = `完成！新增 ${added.length} 筆`;
-    document.getElementById('totalCount').innerText = collectedData.length;
-    
+// 儲存關鍵字
+function saveKeywords() {
+    localStorage.setItem('crawl_keywords', JSON.stringify(keywords));
+    renderKeywords();
+}
+
+// 顯示關鍵字標籤
+function renderKeywords() {
+    const container = document.getElementById('keywordTags');
+    container.innerHTML = keywords.map(k => 
+        `<span class="keyword-tag">${k} <span style="cursor:pointer;" onclick="removeKeyword('${k}')">❌</span></span>`
+    ).join('');
+}
+
+// 新增關鍵字
+function addKeyword() {
+    const input = document.getElementById('newKeyword');
+    const newKeyword = input.value.trim();
+    if (newKeyword && !keywords.includes(newKeyword)) {
+        keywords.push(newKeyword);
+        saveKeywords();
+        input.value = '';
+    }
+}
+
+// 刪除關鍵字
+function removeKeyword(keyword) {
+    keywords = keywords.filter(k => k !== keyword);
+    saveKeywords();
+}
+
+// 載入暫存資料（從 localStorage）
+function loadTempData() {
+    const saved = localStorage.getItem('temp_crawl_data');
+    if (saved) {
+        tempData = JSON.parse(saved);
+    } else {
+        tempData = [];
+    }
+}
+
+// 儲存暫存資料
+function saveTempData() {
+    localStorage.setItem('temp_crawl_data', JSON.stringify(tempData));
+    updateStats();
+}
+
+// 更新統計
+function updateStats() {
+    document.getElementById('totalCount').innerText = tempData.length;
+    document.getElementById('selectedCount').innerText = selectedRows.size;
+}
+
+// 重新整理表格
+function refreshData() {
     renderTable();
-    
-    setTimeout(() => {
-        progressBar.style.width = '0%';
-        statusSpan.innerText = '待機中';
-        startBtn.disabled = false;
-    }, 1500);
+    updateStats();
 }
 
+// 顯示表格
 function renderTable() {
     const tbody = document.getElementById('tableBody');
-    if(collectedData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">暫無資料</td></tr>';
+    
+    if (tempData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">暫無資料，點擊「開始爬蟲」收集</td></tr>';
         return;
     }
     
-    tbody.innerHTML = collectedData.map(item => `
+    tbody.innerHTML = tempData.map((item, index) => `
         <tr>
-            <td style="font-weight:500;">${escapeHtml(item.company)}</td>
-            <td>${escapeHtml(item.product)}</td>
-            <td>${escapeHtml(item.contact)}</td>
-            <td>${escapeHtml(item.phone)}</td>
-            <td class="email">${escapeHtml(item.email)}</td>
-            <td><span class="badge ${item.region === '台灣' ? 'badge-tw' : 'badge-cn'}">${item.region}</span></td>
+            <td class="checkbox-col">
+                <input type="checkbox" class="row-checkbox" data-index="${index}" ${selectedRows.has(index) ? 'checked' : ''} onchange="toggleRow(${index})">
+            </td>
+            <td>${escapeHtml(item.company || '')}</td>
+            <td>${escapeHtml(item.product || '')}</td>
+            <td>${escapeHtml(item.contact || '')}</td>
+            <td>${escapeHtml(item.phone || '')}</td>
+            <td class="email">${escapeHtml(item.email || '')}</td>
+            <td>${escapeHtml(item.address || '')}</td>
+            <td>${item.website ? `<a href="${item.website}" target="_blank">${escapeHtml(item.website)}</a>` : ''}</td>
+            <td>${escapeHtml(item.note || '')}</td>
         </tr>
     `).join('');
 }
 
-async function exportToSheet() {
-    if(collectedData.length === 0) {
-        alert('沒有資料可寫入');
+// 切換選取
+function toggleRow(index) {
+    if (selectedRows.has(index)) {
+        selectedRows.delete(index);
+    } else {
+        selectedRows.add(index);
+    }
+    updateStats();
+}
+
+// 全選
+function selectAll() {
+    for (let i = 0; i < tempData.length; i++) {
+        selectedRows.add(i);
+    }
+    renderTable();
+    updateStats();
+}
+
+// 取消全選
+function deselectAll() {
+    selectedRows.clear();
+    renderTable();
+    updateStats();
+}
+
+// 切換全選
+function toggleSelectAll() {
+    const cb = document.getElementById('selectAll');
+    if (cb.checked) {
+        selectAll();
+    } else {
+        deselectAll();
+    }
+}
+
+// 刪除選取
+function deleteSelected() {
+    if (selectedRows.size === 0) {
+        showToast('請先選取要刪除的資料');
         return;
     }
     
-    // 找出還沒寫入的
-    const unsynced = collectedData.slice(syncedCount);
-    if(unsynced.length === 0) {
-        alert('所有資料都已寫入過');
+    if (confirm(`確定要刪除 ${selectedRows.size} 筆資料嗎？`)) {
+        const newData = [];
+        for (let i = 0; i < tempData.length; i++) {
+            if (!selectedRows.has(i)) {
+                newData.push(tempData[i]);
+            }
+        }
+        tempData = newData;
+        selectedRows.clear();
+        saveTempData();
+        refreshData();
+        showToast(`已刪除 ${selectedRows.size} 筆資料`);
+    }
+}
+
+// 清空全部暫存
+function clearTempData() {
+    if (confirm('確定要清空所有暫存資料嗎？')) {
+        tempData = [];
+        selectedRows.clear();
+        saveTempData();
+        refreshData();
+        showToast('已清空所有暫存資料');
+    }
+}
+
+// ==================== 爬蟲 ====================
+async function startCrawl() {
+    if (keywords.length === 0) {
+        showToast('請先新增搜尋關鍵字');
         return;
     }
     
+    const progressDiv = document.getElementById('progress');
+    const progressBar = document.getElementById('progressBar');
     const statusSpan = document.getElementById('statusText');
-    statusSpan.innerText = '寫入 Google Sheets...';
     
-    let successCount = 0;
+    progressDiv.style.display = 'block';
+    statusSpan.innerText = '爬蟲執行中...';
     
-    for(const item of unsynced) {
-        try {
-            const response = await fetch(GOOGLE_SHEETS_API, {
-                method: 'POST',
-                mode: 'no-cors', // Google Apps Script 需要這個
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    company: item.company,
-                    product: item.product,
-                    contact: item.contact,
-                    phone: item.phone,
-                    email: item.email,
-                    address: item.address,
-                    website: item.website,
-                    note: item.note
-                })
-            });
-            successCount++;
-            syncedCount++;
-            document.getElementById('sheetCount').innerText = syncedCount;
-            await sleep(200);
-        } catch(e) {
-            console.error('寫入失敗:', e);
+    let allResults = [];
+    
+    for (let i = 0; i < keywords.length; i++) {
+        const keyword = keywords[i];
+        progressBar.style.width = `${(i / keywords.length) * 100}%`;
+        statusSpan.innerText = `搜尋: ${keyword}`;
+        
+        // 呼叫後端 API（這裡用模擬）
+        const results = await simulateCrawl(keyword);
+        allResults.push(...results);
+        
+        await sleep(1000);
+    }
+    
+    // 去重
+    const unique = [];
+    const seen = new Set();
+    for (const item of allResults) {
+        const key = item.email || item.website;
+        if (key && !seen.has(key)) {
+            seen.add(key);
+            unique.push(item);
         }
     }
     
-    statusSpan.innerText = `已寫入 ${successCount} 筆到 Sheets`;
-    showToast(`✅ 成功寫入 ${successCount} 筆資料到 Google Sheets`);
+    // 加入暫存
+    tempData.push(...unique);
+    saveTempData();
+    refreshData();
+    
+    progressDiv.style.display = 'none';
+    statusSpan.innerText = `完成！新增 ${unique.length} 筆`;
+    showToast(`爬蟲完成，新增 ${unique.length} 筆資料`);
     
     setTimeout(() => {
         statusSpan.innerText = '待機中';
-    }, 2000);
+    }, 3000);
 }
+
+// 模擬爬蟲（實際要串 DeepSeek API）
+async function simulateCrawl(keyword) {
+    // 這裡模擬回傳資料，實際要串接你的後端
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const mockData = [
+                {
+                    company: `${keyword} 供應商 A`,
+                    product: keyword,
+                    contact: '王大明',
+                    phone: '02-12345678',
+                    email: `sales${Math.floor(Math.random()*100)}@example.com`,
+                    address: '桃園市龜山區',
+                    website: 'https://example.com',
+                    note: 'AI 自動採集'
+                },
+                {
+                    company: `${keyword} 製造商 B`,
+                    product: keyword,
+                    contact: '李淑芬',
+                    phone: '03-87654321',
+                    email: `contact${Math.floor(Math.random()*100)}@sample.com`,
+                    address: '新竹科學園區',
+                    website: 'https://sample.com',
+                    note: 'AI 自動採集'
+                }
+            ];
+            resolve(mockData);
+        }, 1500);
+    });
+}
+
+// ==================== 寫入 Google Sheets ====================
+async function writeToSheets() {
+    if (selectedRows.size === 0) {
+        showToast('請先選取要寫入的資料');
+        return;
+    }
+    
+    const toWrite = [];
+    for (const idx of selectedRows) {
+        toWrite.push(tempData[idx]);
+    }
+    
+    if (confirm(`確定要將 ${toWrite.length} 筆資料寫入 Google Sheets 嗎？`)) {
+        const statusSpan = document.getElementById('statusText');
+        statusSpan.innerText = '寫入中...';
+        
+        let successCount = 0;
+        for (const item of toWrite) {
+            try {
+                // 實際呼叫 Google Apps Script
+                // await fetch(GOOGLE_SHEETS_API, {
+                //     method: 'POST',
+                //     mode: 'no-cors',
+                //     body: JSON.stringify(item)
+                // });
+                successCount++;
+                await sleep(200);
+            } catch(e) {
+                console.error('寫入失敗:', e);
+            }
+        }
+        
+        statusSpan.innerText = '待機中';
+        showToast(`✅ 已寫入 ${successCount} 筆到 Google Sheets`);
+        
+        // 可選擇刪除已寫入的資料
+        if (confirm('已寫入的資料要從暫存中刪除嗎？')) {
+            const newData = [];
+            for (let i = 0; i < tempData.length; i++) {
+                if (!selectedRows.has(i)) {
+                    newData.push(tempData[i]);
+                }
+            }
+            tempData = newData;
+            selectedRows.clear();
+            saveTempData();
+            refreshData();
+        }
+    }
+}
+
+// ==================== 工具函數 ====================
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 function showToast(msg) {
     const toast = document.createElement('div');
@@ -371,16 +580,15 @@ function showToast(msg) {
     setTimeout(() => toast.remove(), 3000);
 }
 
-function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; }); }
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;';
+    });
+}
 
-// 預載 demo 資料
-collectedData = [
-    { company: "台灣塑膠工業", product: "塑膠原料", contact: "王大明", phone: "02-27122211", email: "sales@fpc.com.tw", address: "台北市", website: "https://fpc.com.tw", note: "demo", region: "台灣" }
-];
-syncedCount = 0;
-renderTable();
-document.getElementById('totalCount').innerText = collectedData.length;
+// 啟動
+init();
 </script>
 </body>
 </html>
