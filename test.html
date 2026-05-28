@@ -74,7 +74,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1);
+            /* 移除鏡像 transform: scaleX(-1); 讓畫面自然，擷取時不反轉，OCR正確 */
         }
         .camera-overlay {
             position: absolute;
@@ -279,7 +279,7 @@
         <p>對準名片 • 自動擷取 • 儲存至表格</p>
     </header>
 
-    <!-- 相機預覽區塊 -->
+    <!-- 相機預覽區塊 (無鏡像) -->
     <div class="card-panel">
         <div class="camera-area">
             <video id="video" autoplay playsinline muted></video>
@@ -327,7 +327,7 @@
         <!-- 動態渲染表格 -->
         <div class="badge-empty">暫無資料，點擊掃描或新增名片</div>
     </div>
-    <footer>支援中英文OCR • 拍照後自動填入表單，可編輯再儲存</footer>
+    <footer>支援中英文OCR • 相機原始畫面(無鏡像)文字正確辨識 • 可編輯再儲存</footer>
 </div>
 
 <div id="loadingOverlay" class="loading-spinner">
@@ -401,7 +401,6 @@
                     businessCards.splice(parseInt(idx), 1);
                     renderTable();
                     showToast('已刪除該筆名片', 1000);
-                    // 可選: 同步 localStorage
                     saveToLocalStorage();
                 }
             });
@@ -434,7 +433,6 @@
                 if (!Array.isArray(businessCards)) businessCards = [];
             } catch(e) { businessCards = []; }
         } else {
-            // 範例示範預設資料 (可有可無)
             businessCards = [];
         }
         renderTable();
@@ -459,11 +457,10 @@
             address: address,
             timestamp: new Date().toISOString()
         };
-        businessCards.unshift(newCard); // 最新放前面
+        businessCards.unshift(newCard);
         renderTable();
         saveToLocalStorage();
         showToast('✓ 已儲存至名片庫 (Sheet)', 1500);
-        // 可選不清空表單，但保留讓用戶連續新增；但為體驗，保留資料但不清除, 也可提供按鈕清除
         return true;
     }
 
@@ -473,7 +470,6 @@
             showToast('沒有名片資料可匯出', 1200);
             return;
         }
-        // 準備 sheet 資料 (二維陣列)
         const sheetData = [["姓名", "公司/職稱", "電話", "電子郵件", "地址/網站", "建立時間"]];
         for (let card of businessCards) {
             sheetData.push([
@@ -492,23 +488,25 @@
         showToast('匯出 Excel 成功', 1500);
     }
 
-    // 初始化相機
+    // 初始化相機 (無鏡像，直接使用後鏡頭原始畫面)
     async function initCamera() {
         try {
             if (mediaStream) {
                 mediaStream.getTracks().forEach(track => track.stop());
             }
+            // 強制使用後鏡頭，且不套用任何鏡像轉換，讓預覽與實際拍攝方向一致
             const constraints = {
-                video: { facingMode: { exact: "environment" } }  // 後鏡頭優先
+                video: { facingMode: { exact: "environment" } }
             };
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
             } catch (err) {
-                // 若後鏡頭失敗，退回一般鏡頭
-                console.warn("後鏡頭失敗，使用前置/默認", err);
+                console.warn("無法取得後鏡頭，嘗試任何攝影機", err);
                 mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
             }
             videoElem.srcObject = mediaStream;
+            // 確保影片無 CSS 鏡像轉換
+            videoElem.style.transform = "none";
             await videoElem.play();
         } catch (error) {
             console.error("相機錯誤:", error);
@@ -516,29 +514,28 @@
         }
     }
 
-    // 從 video 截圖並進行 OCR
+    // 從 video 截圖並進行 OCR (直接抓取當前frame，無鏡像干擾)
     async function captureAndOCR() {
         if (!videoElem.videoWidth || !videoElem.videoHeight) {
             showToast("相機尚未準備好，請稍後", 1000);
             return;
         }
         loadingOverlay.style.visibility = "visible";
-        // 建立 canvas 並繪製當前影格 (考慮鏡像翻轉其實無妨但維持原樣)
         const canvas = document.createElement('canvas');
         const width = videoElem.videoWidth;
         const height = videoElem.videoHeight;
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
-        // 因為影片有 scaleX(-1) 鏡像，繪製時直接繪製即可，不需要特別反轉 (保留辨識文字方向)
+        // 直接繪製影片當前幀 (由於影片沒有鏡像，繪製出來文字方向完全正確)
         ctx.drawImage(videoElem, 0, 0, width, height);
-        // 轉為圖像數據
+        
+        // 可選：增加一點預處理來提升對比，但直接保留原樣給Tesseract
         const imageData = canvas.toDataURL('image/jpeg', 0.9);
         const imgBlob = await (await fetch(imageData)).blob();
         
         try {
-            // 使用 Tesseract 進行中英文辨識 (語言包 eng+chi_tra 可提高繁體+英文)
-            // 注意: 使用 eng+chi_tra 加快且支援名片常見文字
+            // 使用 Tesseract 中英文辨識 (增強名片常見字)
             const worker = await Tesseract.createWorker({
                 logger: m => console.log(m)
             });
@@ -547,9 +544,12 @@
             const { data: { text } } = await worker.recognize(imgBlob);
             await worker.terminate();
             
-            // 解析 OCR 文字並填入表單 (智慧欄位擷取)
-            parseOcrToForm(text);
-            showToast("辨識完成！請檢查欄位再儲存", 1800);
+            if (!text || text.trim().length === 0) {
+                showToast("未辨識到文字，請確認名片光線充足且對焦清晰", 2000);
+            } else {
+                parseOcrToForm(text);
+                showToast("辨識完成！請檢查欄位再儲存", 1800);
+            }
         } catch (err) {
             console.error("OCR錯誤", err);
             showToast("辨識失敗，請確認光線清晰再試一次", 2000);
@@ -558,10 +558,9 @@
         }
     }
 
-    // 用正規方式從 OCR 結果提取姓名、電話、email、公司等 (名片常見模式)
+    // 進階解析OCR文字並填入表單 (姓名、電話、email、公司、地址)
     function parseOcrToForm(ocrText) {
         if (!ocrText) return;
-        // 整理文字以換行及空格分詞
         const lines = ocrText.split(/\r?\n/);
         const fullText = ocrText;
         
@@ -583,56 +582,65 @@
         }
         if (foundPhone) phoneInput.value = foundPhone;
         
-        // 3. 姓名: 通常名片第一行或是關鍵字附近，先嘗試找尋 "姓名" 附近，但大部分規則抓前兩行且避開公司字眼
-        // 簡單方法: 取非純數字郵件網址的行，且長度小於12個中文字，優先猜為姓名
+        // 3. 姓名: 過濾掉明顯非姓名的行(公司、電話、email)，取前幾行合理短文字
         let possibleName = '';
         for (let line of lines) {
             line = line.trim();
             if (!line) continue;
-            // 排除email、電話、太多數字、包含公司關鍵詞
             if (emailMatch && line.includes(emailMatch[0])) continue;
             if (foundPhone && line.includes(foundPhone)) continue;
-            if (line.match(/(公司|有限公司|股份|集團|企業|科技|商務|顧問|經理|工程師|博士|教授)/i)) continue;
-            if (line.length > 2 && line.length < 20 && !line.match(/^[\d\-\+\s\(\)]+$/)) {
-                // 中英文姓名混合
+            // 排除長度過長、包含公司關鍵詞或數字的行
+            if (line.match(/(公司|有限公司|股份|集團|企業|科技|商務|顧問|經理|工程師|博士|教授|協會|中心|院|大學|學院|行銷|業務|總監|主任|專員)/i)) continue;
+            if (line.length > 2 && line.length < 25 && !line.match(/^[\d\-\+\s\(\)]+$/)) {
                 possibleName = line;
                 break;
             }
         }
         if (possibleName) nameInput.value = possibleName;
-        else if (lines[0] && lines[0].length < 25) nameInput.value = lines[0];
+        else if (lines[0] && lines[0].length < 28 && !lines[0].match(/(公司|股份|電話|@)/i)) nameInput.value = lines[0];
         
-        // 4. 公司/職位: 常見包含 "有限公司"、"股份有限公司"、"科技"、"總經理"等
-        let companyMatch = '';
+        // 4. 公司/職位: 尋找公司行號與職稱
+        let companyLine = '';
+        let titleLine = '';
         for (let line of lines) {
-            if (line.match(/(公司|集團|企業|商行|行銷|顧問|科技|工業|股份|基金會|協會|大學|學院)/i) && !line.match(emailRegex) && !line.match(phoneRegex)) {
-                companyMatch = line;
+            if (line.match(/(公司|集團|企業|商行|行銷|顧問|科技|工業|股份|基金會|協會|大學|學院|事務所|銀行|保險)/i) && !line.match(emailRegex) && !line.match(phoneRegex)) {
+                companyLine = line;
                 break;
             }
         }
-        // 合併職位與公司: 若公司行後面還有職位關鍵字，再掃描
-        let titleMatch = '';
         for (let line of lines) {
-            if (line.match(/(總經理|經理|副理|協理|工程師|設計師|專員|主任|總監|執行長|助理|業務)/i) && !line.match(companyMatch)) {
-                titleMatch = line;
+            if (line.match(/(總經理|經理|副理|協理|工程師|設計師|專員|主任|總監|執行長|助理|業務|財務|行銷|管理師|顧問|律師|醫師|會計師)/i) && !line.match(emailRegex) && !line.match(phoneRegex)) {
+                titleLine = line;
                 break;
             }
         }
-        let finalCompany = companyMatch;
-        if (titleMatch && finalCompany) finalCompany += ` · ${titleMatch}`;
-        else if (titleMatch && !finalCompany) finalCompany = titleMatch;
+        let finalCompany = companyLine || '';
+        if (titleLine && finalCompany) finalCompany = `${finalCompany} · ${titleLine}`;
+        else if (titleLine && !finalCompany) finalCompany = titleLine;
         if (finalCompany) companyInput.value = finalCompany;
         
-        // 5. 地址/網站: 包含 http, www 或 縣市地址
+        // 5. 地址/網站: 擷取URL或實體地址
         let webOrAddr = '';
         const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/i;
         const urlMatch = fullText.match(urlRegex);
         if (urlMatch) webOrAddr = urlMatch[0];
-        const addrRegex = /([\u4e00-\u9fa5]{2,}(?:市|縣|區|鎮|鄉|村|街|路|段|巷|弄|號))/;
+        const addrRegex = /([\u4e00-\u9fa5]{2,}(?:市|縣|區|鎮|鄉|村|街|路|段|巷|弄|號|樓|室))/;
         const addrMatch = fullText.match(addrRegex);
-        if (addrMatch && !webOrAddr) webOrAddr = addrMatch[0];
-        else if (addrMatch && webOrAddr) webOrAddr = webOrAddr + " " + addrMatch[0];
+        if (addrMatch) {
+            if (webOrAddr) webOrAddr = webOrAddr + " " + addrMatch[0];
+            else webOrAddr = addrMatch[0];
+        }
         if (webOrAddr) addressInput.value = webOrAddr;
+        
+        // 額外: 若公司欄位仍為空，但有明顯大寫英文組合或中文組織名
+        if (!companyInput.value.trim()) {
+            for (let line of lines) {
+                if (line.length > 2 && line.length < 40 && line.match(/[A-Z]{2,}/) && !line.match(/(電話|email|@|www)/i)) {
+                    companyInput.value = line;
+                    break;
+                }
+            }
+        }
     }
 
     // 清空表單
@@ -645,7 +653,7 @@
         showToast('表單已清空', 800);
     }
 
-    // 事件綁定
+    // 綁定事件
     snapBtn.addEventListener('click', () => {
         captureAndOCR();
     });
@@ -655,14 +663,14 @@
     });
     exportExcelBtn.addEventListener('click', exportToExcel);
     
-    // 頁面離開前釋放資源
+    // 離開頁面釋放相機資源
     window.addEventListener('beforeunload', () => {
         if (mediaStream) {
             mediaStream.getTracks().forEach(track => track.stop());
         }
     });
 
-    // 啟動相機以及載入本地資料
+    // 啟動相機及載入本地儲存資料
     initCamera();
     loadFromLocalStorage();
 </script>
