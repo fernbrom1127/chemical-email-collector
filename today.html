@@ -3,105 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>今日重點 | 台灣盛世國際化學</title>
+    <title>化工現貨/期貨報價 | 台灣盛世國際化學</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', 'Courier New', monospace;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             padding: 2rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
-        .container {
-            max-width: 900px;
-            width: 100%;
-            margin: 0 auto;
-        }
-        .report-box {
-            background: #0f172a;
-            border: 2px solid #334155;
-            border-radius: 1.5rem;
-            padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-        pre {
-            color: #e2e8f0;
-            font-size: 0.95rem;
-            font-family: 'Courier New', 'Segoe UI', monospace;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            line-height: 1.6;
-            margin: 0;
-        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
         .header {
             text-align: center;
             margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #334155;
         }
         .header h1 {
-            color: #fbbf24;
-            font-size: 1.5rem;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
             margin-bottom: 0.5rem;
         }
-        .header p {
-            color: #94a3b8;
-            font-size: 0.8rem;
+        .header p { color: #94a3b8; font-size: 0.9rem; }
+        
+        .card {
+            background: #1e293b;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid #334155;
+            margin-bottom: 1.5rem;
         }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+        th { color: #fbbf24; font-weight: 600; }
+        td { color: #e2e8f0; }
+        .spot-price { color: #3b82f6; font-weight: bold; }
+        .futures-price { color: #10b981; font-weight: bold; }
+        .basis-positive { color: #ef4444; }
+        .basis-negative { color: #10b981; }
+        .na { color: #64748b; font-style: italic; }
+        
         .footer {
             text-align: center;
-            margin-top: 1.5rem;
+            margin-top: 2rem;
             padding-top: 1rem;
             border-top: 1px solid #334155;
             color: #475569;
             font-size: 0.7rem;
         }
-        .footer a {
+        .update-time {
+            text-align: right;
             color: #64748b;
-            text-decoration: none;
-        }
-        .footer a:hover {
-            color: #94a3b8;
-        }
-        @media (max-width: 768px) {
-            body { padding: 1rem; }
-            .report-box { padding: 1rem; }
-            pre { font-size: 0.8rem; }
+            font-size: 0.7rem;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="report-box">
-        <div class="header">
-            <h1>🏭 台灣盛世國際化學</h1>
-            <p>每日情報重點｜2026-05-28</p>
-        </div>
-        <pre>📈 價格動態：
-├── PP：漲 3.2%（需求回暖帶動）
-├── PE：漲 0.5%（成本支撐）
-├── ABS：跌 1.8%（下游採購放緩）
-└── PVC：跌 0.3%（庫存壓力）
+    <div class="header">
+        <h1>🏭 台灣盛世國際化學</h1>
+        <p>塑膠原料 現貨 vs 期貨 報價表</p>
+    </div>
+    
+    <div class="update-time">📅 更新時間：2026-05-28 01:33:33</div>
+    
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>商品</th>
+                    <th>中文名稱</th>
+                    <th>生意社現貨 (元/噸)</th>
+                    <th>大商所期貨 (元/噸)</th>
+                    <th>基差 (現貨-期貨)</th>
+                </tr>
+            </thead>
+            <tbody>
 
-🎯 今日行動建議：
-├── PP：賣出（漲幅已高，短線獲利了結）
-├── PE：觀望（波動有限，等待方向）
-├── ABS：買進（逢低布局，後市看漲）
-└── PVC：觀望（弱勢整理，暫不操作）
+                <tr>
+                    <td><strong>PP</strong></td>
+                    <td>聚丙烯</td>
+                    <td><span class="na">未取得</span></td>
+                    <td><span class="na">無期貨</span></td>
+                    <td><span class="na">無法計算</span></td>
+                </tr>
 
-⚠️ 注意事項：
-└── 關注國際油價波動風險</pre>
-        <div class="footer">
-            <a href="/chemical-email-collector/index.html">📊 完整戰情室</a> | 
-            <a href="/chemical-email-collector/intelligence.html">📈 產業報告庫</a>
-        </div>
+                <tr>
+                    <td><strong>LLDPE</strong></td>
+                    <td>線性低密度聚乙烯</td>
+                    <td><span class="na">未取得</span></td>
+                    <td><span class="na">無期貨</span></td>
+                    <td><span class="na">無法計算</span></td>
+                </tr>
+
+                <tr>
+                    <td><strong>ABS</strong></td>
+                    <td>ABS樹脂</td>
+                    <td><span class="na">未取得</span></td>
+                    <td><span class="na">無期貨</span></td>
+                    <td><span class="na">無法計算</span></td>
+                </tr>
+
+                <tr>
+                    <td><strong>PVC</strong></td>
+                    <td>聚氯乙烯</td>
+                    <td><span class="na">未取得</span></td>
+                    <td><span class="na">無期貨</span></td>
+                    <td><span class="na">無法計算</span></td>
+                </tr>
+
+                <tr>
+                    <td><strong>PC</strong></td>
+                    <td>聚碳酸酯</td>
+                    <td><span class="na">未取得</span></td>
+                    <td><span class="na">無期貨</span></td>
+                    <td><span class="na">無法計算</span></td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="footer">
+        📊 資料來源：生意社 (現貨) | 大連商品交易所 (期貨)
     </div>
 </div>
 </body>
