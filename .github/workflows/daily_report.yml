@@ -2,9 +2,12 @@ name: 每日化工情報報告
 
 on:
   schedule:
-    # 每天早上 8:00（台灣時間 UTC+8）
     - cron: '0 0 * * *'
-  workflow_dispatch:  # 手動觸發
+  workflow_dispatch:
+
+# 關鍵修復：在此處加入權限設定
+permissions:
+  contents: write
 
 jobs:
   generate-report:
