@@ -14,7 +14,6 @@
         }
         .container { max-width: 1400px; margin: 0 auto; }
         
-        /* 卡片 */
         .card {
             background: white;
             border-radius: 2rem;
@@ -28,9 +27,9 @@
             padding: 2rem;
         }
         .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .header p { opacity: 0.8; }
         .content { padding: 2rem; }
         
-        /* 按鈕區 */
         .button-bar {
             display: flex;
             gap: 1rem;
@@ -48,28 +47,15 @@
             background: #f1f5f9;
             color: #1e293b;
         }
-        .btn-primary {
-            background: #1e3a5f;
-            color: white;
-        }
+        .btn-primary { background: #1e3a5f; color: white; }
         .btn-primary:hover { background: #0f2b3d; transform: translateY(-2px); }
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
+        .btn-success { background: #10b981; color: white; }
         .btn-success:hover { background: #059669; transform: translateY(-2px); }
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
+        .btn-danger { background: #ef4444; color: white; }
         .btn-danger:hover { background: #dc2626; transform: translateY(-2px); }
-        .btn-warning {
-            background: #f59e0b;
-            color: white;
-        }
+        .btn-warning { background: #f59e0b; color: white; }
         .btn-warning:hover { background: #d97706; transform: translateY(-2px); }
         
-        /* 關鍵字區 */
         .keyword-section {
             background: #f8fafc;
             border-radius: 1rem;
@@ -96,7 +82,6 @@
             border-radius: 0.5rem;
         }
         
-        /* 表格 */
         .table-wrapper {
             overflow-x: auto;
             max-height: 500px;
@@ -124,7 +109,6 @@
         .email { color: #3b82f6; font-family: monospace; }
         .checkbox-col { width: 30px; text-align: center; }
         
-        /* 狀態訊息 */
         .toast {
             position: fixed;
             bottom: 2rem;
@@ -141,7 +125,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        /* 進度條 */
         .progress {
             background: #e2e8f0;
             border-radius: 1rem;
@@ -185,7 +168,6 @@
             <p>台灣盛世國際化學 · 爬蟲控制 + 資料審核 + 寫入 Sheets</p>
         </div>
         <div class="content">
-            <!-- 按鈕區 -->
             <div class="button-bar">
                 <button class="btn btn-primary" onclick="startCrawl()">🚀 開始爬蟲</button>
                 <button class="btn btn-success" onclick="writeToSheets()">📤 寫入 Google Sheets</button>
@@ -193,19 +175,16 @@
                 <button class="btn" onclick="refreshData()">🔄 重新整理</button>
             </div>
             
-            <!-- 統計 -->
-            <div class="stats" id="stats">
+            <div class="stats">
                 <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>暫存資料</div></div>
                 <div class="stat-card"><div class="stat-number" id="selectedCount">0</div><div>已選取</div></div>
                 <div class="stat-card"><div id="statusText">待機中</div><div>狀態</div></div>
             </div>
             
-            <!-- 進度條 -->
             <div class="progress" id="progress">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
             
-            <!-- 關鍵字管理區 -->
             <div class="keyword-section">
                 <div><strong>🔍 搜尋關鍵字</strong></div>
                 <div id="keywordTags"></div>
@@ -215,20 +194,13 @@
                 </div>
             </div>
             
-            <!-- 資料表格 -->
             <div class="table-wrapper">
-                <table id="dataTable">
+                <table>
                     <thead>
                         <tr>
                             <th class="checkbox-col"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
-                            <th>公司名稱</th>
-                            <th>主要產品</th>
-                            <th>聯絡人</th>
-                            <th>連絡電話</th>
-                            <th>電子信箱</th>
-                            <th>工廠地址</th>
-                            <th>公司網址</th>
-                            <th>備註</th>
+                            <th>公司名稱</th><th>主要產品</th><th>聯絡人</th><th>連絡電話</th>
+                            <th>電子信箱</th><th>工廠地址</th><th>公司網址</th><th>備註</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -237,7 +209,6 @@
                 </table>
             </div>
             
-            <!-- 底部按鈕 -->
             <div class="button-bar" style="margin-top: 1rem;">
                 <button class="btn btn-danger" onclick="deleteSelected()">🗑️ 刪除選取</button>
                 <button class="btn" onclick="selectAll()">☑️ 全選</button>
@@ -246,12 +217,13 @@
         </div>
     </div>
 </div>
+
 <script>
 // ==================== 全域變數 ====================
-let tempData = [];          // 暫存資料
-let selectedRows = new Set(); // 選取的索引
+let tempData = [];
+let selectedRows = new Set();
 
-// Google Sheets 寫入 API（需要部署 Google Apps Script）
+// Google Sheets 寫入 API（你的 Apps Script 網址）
 const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbxnMYrbS2Cy5JwjKaOrH2fSnY7lslmIhA08hHiuENDTZmABooeJ1ugjLjzU64OYpkaKCw/exec";
 
 // 預設關鍵字
@@ -269,22 +241,17 @@ function init() {
     refreshData();
 }
 
-// 載入關鍵字
 function loadKeywords() {
     const saved = localStorage.getItem('crawl_keywords');
-    if (saved) {
-        keywords = JSON.parse(saved);
-    }
+    if (saved) keywords = JSON.parse(saved);
     renderKeywords();
 }
 
-// 儲存關鍵字
 function saveKeywords() {
     localStorage.setItem('crawl_keywords', JSON.stringify(keywords));
     renderKeywords();
 }
 
-// 顯示關鍵字標籤
 function renderKeywords() {
     const container = document.getElementById('keywordTags');
     container.innerHTML = keywords.map(k => 
@@ -292,7 +259,6 @@ function renderKeywords() {
     ).join('');
 }
 
-// 新增關鍵字
 function addKeyword() {
     const input = document.getElementById('newKeyword');
     const newKeyword = input.value.trim();
@@ -303,44 +269,33 @@ function addKeyword() {
     }
 }
 
-// 刪除關鍵字
 function removeKeyword(keyword) {
     keywords = keywords.filter(k => k !== keyword);
     saveKeywords();
 }
 
-// 載入暫存資料（從 localStorage）
 function loadTempData() {
     const saved = localStorage.getItem('temp_crawl_data');
-    if (saved) {
-        tempData = JSON.parse(saved);
-    } else {
-        tempData = [];
-    }
+    tempData = saved ? JSON.parse(saved) : [];
 }
 
-// 儲存暫存資料
 function saveTempData() {
     localStorage.setItem('temp_crawl_data', JSON.stringify(tempData));
     updateStats();
 }
 
-// 更新統計
 function updateStats() {
     document.getElementById('totalCount').innerText = tempData.length;
     document.getElementById('selectedCount').innerText = selectedRows.size;
 }
 
-// 重新整理表格
 function refreshData() {
     renderTable();
     updateStats();
 }
 
-// 顯示表格
 function renderTable() {
     const tbody = document.getElementById('tableBody');
-    
     if (tempData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">暫無資料，點擊「開始爬蟲」收集</td></tr>';
         return;
@@ -363,65 +318,46 @@ function renderTable() {
     `).join('');
 }
 
-// 切換選取
 function toggleRow(index) {
-    if (selectedRows.has(index)) {
-        selectedRows.delete(index);
-    } else {
-        selectedRows.add(index);
-    }
+    selectedRows.has(index) ? selectedRows.delete(index) : selectedRows.add(index);
     updateStats();
 }
 
-// 全選
 function selectAll() {
-    for (let i = 0; i < tempData.length; i++) {
-        selectedRows.add(i);
-    }
+    for (let i = 0; i < tempData.length; i++) selectedRows.add(i);
     renderTable();
     updateStats();
 }
 
-// 取消全選
 function deselectAll() {
     selectedRows.clear();
     renderTable();
     updateStats();
 }
 
-// 切換全選
 function toggleSelectAll() {
     const cb = document.getElementById('selectAll');
-    if (cb.checked) {
-        selectAll();
-    } else {
-        deselectAll();
-    }
+    cb.checked ? selectAll() : deselectAll();
 }
 
-// 刪除選取
 function deleteSelected() {
     if (selectedRows.size === 0) {
         showToast('請先選取要刪除的資料');
         return;
     }
-    
     if (confirm(`確定要刪除 ${selectedRows.size} 筆資料嗎？`)) {
         const newData = [];
         for (let i = 0; i < tempData.length; i++) {
-            if (!selectedRows.has(i)) {
-                newData.push(tempData[i]);
-            }
+            if (!selectedRows.has(i)) newData.push(tempData[i]);
         }
         tempData = newData;
         selectedRows.clear();
         saveTempData();
         refreshData();
-        showToast(`已刪除資料`);
+        showToast('已刪除選取資料');
     }
 }
 
-// 清空全部暫存
 function clearTempData() {
     if (confirm('確定要清空所有暫存資料嗎？')) {
         tempData = [];
@@ -453,10 +389,8 @@ async function startCrawl() {
         progressBar.style.width = `${(i / keywords.length) * 100}%`;
         statusSpan.innerText = `搜尋: ${keyword}`;
         
-        // 呼叫後端 API（這裡用模擬）
         const results = await simulateCrawl(keyword);
         allResults.push(...results);
-        
         await sleep(1000);
     }
     
@@ -471,7 +405,6 @@ async function startCrawl() {
         }
     }
     
-    // 加入暫存
     tempData.push(...unique);
     saveTempData();
     refreshData();
@@ -480,14 +413,11 @@ async function startCrawl() {
     statusSpan.innerText = `完成！新增 ${unique.length} 筆`;
     showToast(`爬蟲完成，新增 ${unique.length} 筆資料`);
     
-    setTimeout(() => {
-        statusSpan.innerText = '待機中';
-    }, 3000);
+    setTimeout(() => { statusSpan.innerText = '待機中'; }, 3000);
 }
 
 // 模擬爬蟲（實際要串 DeepSeek API）
 async function simulateCrawl(keyword) {
-    // 這裡模擬回傳資料，實際要串接你的後端
     return new Promise((resolve) => {
         setTimeout(() => {
             const mockData = [
@@ -538,7 +468,6 @@ async function writeToSheets() {
         
         for (const item of toWrite) {
             try {
-                // 實際呼叫 Google Apps Script
                 await fetch(GOOGLE_SHEETS_API, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -565,13 +494,10 @@ async function writeToSheets() {
         statusSpan.innerText = '待機中';
         showToast(`✅ 已寫入 ${successCount} 筆到 Google Sheets${failCount > 0 ? `，失敗 ${failCount} 筆` : ''}`);
         
-        // 可選擇刪除已寫入的資料
         if (successCount > 0 && confirm('已寫入的資料要從暫存中刪除嗎？')) {
             const newData = [];
             for (let i = 0; i < tempData.length; i++) {
-                if (!selectedRows.has(i)) {
-                    newData.push(tempData[i]);
-                }
+                if (!selectedRows.has(i)) newData.push(tempData[i]);
             }
             tempData = newData;
             selectedRows.clear();
@@ -582,9 +508,7 @@ async function writeToSheets() {
 }
 
 // ==================== 工具函數 ====================
-function sleep(ms) { 
-    return new Promise(resolve => setTimeout(resolve, ms)); 
-}
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 function showToast(msg) {
     const toast = document.createElement('div');
@@ -597,10 +521,7 @@ function showToast(msg) {
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
+        return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;';
     });
 }
 
