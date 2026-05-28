@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>名片管理神器｜貼上文字自動解析</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f0f4f8; padding: 20px 12px 100px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: white; border-radius: 32px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        h1 { font-size: 1.6rem; display: flex; align-items: center; gap: 10px; color: #1e293b; margin-bottom: 8px; }
+        .sub { color: #64748b; font-size: 0.85rem; margin-bottom: 20px; }
+        .workflow-steps { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+        .step { flex: 1; background: #f8fafc; border-radius: 20px; padding: 12px; text-align: center; min-width: 100px; }
+        .step .num { background: #3b82f6; color: white; width: 24px; height: 24px; border-radius: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; margin-bottom: 8px; }
+        .step i { font-size: 24px; color: #3b82f6; margin-bottom: 6px; display: block; }
+        .step p { font-size: 0.7rem; color: #334155; }
+        textarea { width: 100%; height: 140px; padding: 16px; border: 1.5px solid #e2e8f0; border-radius: 24px; font-size: 0.9rem; font-family: inherit; resize: vertical; background: #fafcff; }
+        textarea:focus { outline: none; border-color: #3b82f6; background: white; }
+        .parse-btn { background: #3b82f6; color: white; border: none; padding: 14px 20px; border-radius: 60px; font-weight: 600; font-size: 1rem; width: 100%; margin: 12px 0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .form-row { margin-bottom: 16px; }
+        .form-row label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: #475569; display: block; margin-bottom: 5px; }
+        .form-row input, .form-row textarea { width: 100%; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 0.9rem; background: #f8fafc; }
+        .action-buttons { display: flex; gap: 12px; margin-top: 12px; justify-content: flex-end; }
+        .btn-secondary { background: #e2e8f0; border: none; padding: 10px 18px; border-radius: 40px; font-weight: 500; cursor: pointer; }
+        .btn-primary { background: #3b82f6; border: none; padding: 10px 18px; border-radius: 40px; font-weight: 600; color: white; cursor: pointer; }
+        .data-table { overflow-x: auto; }
+        .data-table table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .data-table th { background: #f1f5f9; padding: 10px 8px; text-align: left; }
+        .data-table td { padding: 10px 8px; border-top: 1px solid #eef2ff; }
+        .badge-empty { text-align: center; padding: 30px; color: #94a3b8; }
+        .toast { position: fixed; bottom: 30px; left: 20px; right: 20px; background: #1e293b; color: white; padding: 12px; border-radius: 60px; text-align: center; font-size: 0.85rem; opacity: 0; transition: 0.2s; pointer-events: none; z-index: 1000; }
+        .method-tip { background: #fef3c7; border-radius: 20px; padding: 12px; margin-bottom: 16px; font-size: 0.75rem; color: #92400e; display: flex; align-items: center; gap: 10px; }
+        .method-tip i { font-size: 20px; }
+        @media (max-width: 480px) { .step p { font-size: 0.6rem; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1><i class="fas fa-id-card"></i> 名片管理神器</h1>
+        <div class="sub">使用 Google Lens 掃描 → 貼上文字 → 自動解析</div>
+        
+        <div class="method-tip">
+            <i class="fab fa-google"></i>
+            <span><strong>免費高精準中文辨識：</strong> 用 Google Lens 或 iPhone 相機掃名片 → 複製文字 → 貼到下方框內</span>
+        </div>
+        
+        <div class="workflow-steps">
+            <div class="step"><div class="num">1</div><i class="fas fa-camera"></i><p>Google Lens<br>拍名片</p></div>
+            <div class="step"><div class="num">2</div><i class="fas fa-copy"></i><p>複製<br>全部文字</p></div>
+            <div class="step"><div class="num">3</div><i class="fas fa-paste"></i><p>貼到下方<br>按解析</p></div>
+        </div>
+        
+        <textarea id="ocrText" placeholder="📋 貼上從 Google Lens 複製的名片文字&#10;&#10;例如：&#10;陳美惠&#10;雲端科技股份有限公司 行銷總監&#10;電話：0912-345-678&#10;Email：mei@cloud.com&#10;地址：台北市內湖區洲子街88號"></textarea>
+        <button class="parse-btn" id="parseBtn"><i class="fas fa-magic"></i> 智慧解析名片</button>
+    </div>
+    
+    <div class="card">
+        <h3><i class="fas fa-edit"></i> 編輯 / 儲存</h3>
+        <div class="form-row"><label>姓名</label><input type="text" id="nameField" placeholder="自動填入"></div>
+        <div class="form-row"><label>公司 / 職稱</label><input type="text" id="companyField" placeholder="自動填入"></div>
+        <div class="form-row"><label>電話</label><input type="tel" id="phoneField" placeholder="自動填入"></div>
+        <div class="form-row"><label>電子郵件</label><input type="email" id="emailField" placeholder="自動填入"></div>
+        <div class="form-row"><label>網站 / 地址</label><textarea id="addressField" rows="1" placeholder="自動填入"></textarea></div>
+        <div class="action-buttons">
+            <button class="btn-secondary" id="clearBtn"><i class="fas fa-eraser"></i> 清空</button>
+            <button class="btn-primary" id="saveBtn"><i class="fas fa-save"></i> 存入表格</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3><i class="fas fa-database"></i> 名片資料庫</h3>
+            <button class="btn-secondary" id="exportBtn" style="padding: 6px 14px;"><i class="fas fa-file-excel"></i> 匯出 Excel</button>
+        </div>
+        <div class="data-table" id="tableContainer"><div class="badge-empty">暫無資料</div></div>
+    </div>
+</div>
+<div id="toastMsg" class="toast"></div>
+
+<script>
+    let businessCards = [];
+    const nameInp = document.getElementById('nameField');
+    const companyInp = document.getElementById('companyField');
+    const phoneInp = document.getElementById('phoneField');
+    const emailInp = document.getElementById('emailField');
+    const addressInp = document.getElementById('addressField');
+    const ocrTextarea = document.getElementById('ocrText');
+    const parseBtn = document.getElementById('parseBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const tableContainer = document.getElementById('tableContainer');
+    const toastMsg = document.getElementById('toastMsg');
+    
+    function showToast(msg, dur=2000) {
+        toastMsg.textContent = msg;
+        toastMsg.style.opacity = '1';
+        setTimeout(() => toastMsg.style.opacity = '0', dur);
+    }
+    
+    function saveToLocal() { localStorage.setItem('business_cards', JSON.stringify(businessCards)); }
+    
+    function loadFromLocal() {
+        const stored = localStorage.getItem('business_cards');
+        if(stored) try { businessCards = JSON.parse(stored); if(!Array.isArray(businessCards)) businessCards=[]; } catch(e){}
+        renderTable();
+    }
+    
+    function renderTable() {
+        if(!businessCards.length) { tableContainer.innerHTML = '<div class="badge-empty">📭 尚無名片資料</div>'; return; }
+        const html = `<table style="min-width:500px;"><thead><tr><th>姓名</th><th>公司/職稱</th><th>電話</th><th>Email</th><th>地址/網站</th><th>操作</th></tr></thead><tbody>${
+            businessCards.map((c,i)=>`<tr>
+                <td>${escapeHtml(c.name||'—')}</td>
+                <td>${escapeHtml(c.company||'—')}</td>
+                <td>${escapeHtml(c.phone||'—')}</td>
+                <td>${escapeHtml(c.email||'—')}</td>
+                <td>${escapeHtml(c.address||'—')}</td>
+                <td><button class="del-btn" data-idx="${i}" style="background:none;border:none;color:#ef4444;font-size:1.2rem;"><i class="fas fa-trash-alt"></i></button></td>
+            </tr>`).join('')
+        }</tbody></table>`;
+        tableContainer.innerHTML = html;
+        document.querySelectorAll('.del-btn').forEach(btn=>{
+            btn.onclick = ()=>{
+                const idx = parseInt(btn.dataset.idx);
+                businessCards.splice(idx,1);
+                renderTable(); saveToLocal(); showToast('已刪除');
+            };
+        });
+    }
+    
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    
+    // 核心解析函數 - 精準抓取中文名片
+    function parseAndFill(text) {
+        if(!text.trim()) { showToast('請貼上名片文字',1000); return false; }
+        
+        const lines = text.split(/\r?\n/);
+        const full = text;
+        
+        // 1. Email
+        const emailMatch = full.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        if(emailMatch) emailInp.value = emailMatch[0];
+        
+        // 2. 電話 (台灣手機、市話、+886)
+        let phonePatterns = [
+            /09\d{2}-?\d{3}-?\d{3}/,
+            /0\d{1,2}-?\d{4,5}-?\d{3,4}/,
+            /\+886-?\d{1,2}-?\d{4,5}-?\d{3,4}/,
+            /\(\+?886\)?\d{8,10}/
+        ];
+        let foundPhone = '';
+        for(let pattern of phonePatterns) {
+            let match = full.match(pattern);
+            if(match) { foundPhone = match[0]; break; }
+        }
+        if(foundPhone) phoneInp.value = foundPhone;
+        
+        // 3. 姓名 (尋找2~4個中文字，且不包含公司關鍵字)
+        let nameCandidates = [];
+        for(let line of lines) {
+            line = line.trim();
+            if(!line) continue;
+            // 過濾掉太長、包含公司職位關鍵字
+            if(line.match(/(公司|有限|股份|集團|企業|科技|顧問|經理|工程師|博士|教授|協會|大學|學院|行銷|業務|總監|主任|專員|設計|師|律師|會計|醫師|總經理|執行長|副理|協理|助理|秘書)/i)) continue;
+            // 過濾電話、Email、網址
+            if(line.match(/[@\d+\-()]/)) continue;
+            // 2~4個中文字或英文名
+            if(line.length >=2 && line.length <= 12 && line.match(/[a-zA-Z\u4e00-\u9fa5]/)) {
+                nameCandidates.push(line);
+            }
+        }
+        if(nameCandidates.length > 0) nameInp.value = nameCandidates[0];
+        
+        // 4. 公司 & 職位
+        let companyMatch = '';
+        let titleMatch = '';
+        for(let line of lines) {
+            if(line.match(/(公司|集團|企業|科技|工業|股份|基金會|協會|大學|事務所|銀行|保險|有限|中心|商行|顧問|行銷)/i)) {
+                if(!companyMatch) companyMatch = line;
+            }
+            if(line.match(/(總經理|經理|副理|協理|工程師|設計師|專員|主任|總監|執行長|助理|業務|財務|行銷|管理師|顧問|律師|醫師|會計師|教授|博士|秘書|代表|處長)/i)) {
+                if(!titleMatch) titleMatch = line;
+            }
+        }
+        let finalCompany = companyMatch || '';
+        if(titleMatch && finalCompany && !finalCompany.includes(titleMatch)) finalCompany = `${finalCompany} · ${titleMatch}`;
+        else if(titleMatch && !finalCompany) finalCompany = titleMatch;
+        if(finalCompany) companyInp.value = finalCompany;
+        
+        // 5. 地址/網址
+        let addr = '';
+        const urlMatch = full.match(/(https?:\/\/[^\s]+|www\.[^\s]+)/i);
+        if(urlMatch) addr = urlMatch[0];
+        const addrMatch = full.match(/[\u4e00-\u9fa5]{2,}(?:市|縣|區|鎮|鄉|村|街|路|段|巷|弄|號|樓|室|之)/);
+        if(addrMatch) addr = addr ? addr+' '+addrMatch[0] : addrMatch[0];
+        if(addr) addressInp.value = addr;
+        
+        return true;
+    }
+    
+    parseBtn.onclick = () => {
+        const rawText = ocrTextarea.value;
+        if(!rawText.trim()) { showToast('請先貼上名片文字'); return; }
+        parseAndFill(rawText);
+        showToast('✅ 解析完成，請檢查欄位後儲存');
+    };
+    
+    clearBtn.onclick = () => {
+        nameInp.value = companyInp.value = phoneInp.value = emailInp.value = addressInp.value = '';
+        ocrTextarea.value = '';
+        showToast('已清空');
+    };
+    
+    saveBtn.onclick = () => {
+        const name = nameInp.value.trim();
+        const company = companyInp.value.trim();
+        const phone = phoneInp.value.trim();
+        const email = emailInp.value.trim();
+        const address = addressInp.value.trim();
+        if(!name && !company && !phone && !email && !address) {
+            showToast('沒有資料可儲存',1000);
+            return;
+        }
+        businessCards.unshift({ name, company, phone, email, address, timestamp: new Date().toISOString() });
+        renderTable();
+        saveToLocal();
+        showToast('✓ 已存入名片庫');
+        // 不清空表單，讓用戶可以繼續編輯下一張
+    };
+    
+    exportBtn.onclick = () => {
+        if(!businessCards.length) { showToast('無資料可匯出'); return; }
+        const sheetData = [["姓名","公司/職稱","電話","電子郵件","地址/網站","建立時間"]];
+        businessCards.forEach(c => sheetData.push([c.name||'', c.company||'', c.phone||'', c.email||'', c.address||'', c.timestamp?new Date(c.timestamp).toLocaleString():'']));
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "名片資料庫");
+        XLSX.writeFile(wb, `名片資料_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.xlsx`);
+        showToast('匯出成功');
+    };
+    
+    loadFromLocal();
+</script>
+</body>
+</html>
