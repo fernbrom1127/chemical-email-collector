@@ -3,21 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>化工現貨/期貨報價 | 台灣盛世國際化學</title>
+    <title>塑膠原料即時報價 | 台灣盛世國際化學</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             padding: 2rem;
         }
-        .container { max-width: 1000px; margin: 0 auto; }
-        
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* 頁首 */
         .header {
             text-align: center;
             margin-bottom: 2rem;
         }
+
         .header h1 {
             font-size: 2rem;
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
@@ -26,33 +37,84 @@
             color: transparent;
             margin-bottom: 0.5rem;
         }
-        .header p { color: #94a3b8; font-size: 0.9rem; }
-        
+
+        .header p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* 更新時間 */
+        .update-time {
+            text-align: right;
+            color: #64748b;
+            font-size: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* 報價卡片 */
         .card {
             background: #1e293b;
             border-radius: 1rem;
             padding: 1.5rem;
             border: 1px solid #334155;
             margin-bottom: 1.5rem;
+            transition: all 0.2s;
         }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
+
+        .card:hover {
+            border-color: #fbbf24;
         }
-        th, td {
-            padding: 12px;
-            text-align: left;
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
             border-bottom: 1px solid #334155;
         }
-        th { color: #fbbf24; font-weight: 600; }
-        td { color: #e2e8f0; }
-        .spot-price { color: #3b82f6; font-weight: bold; }
-        .futures-price { color: #10b981; font-weight: bold; }
-        .basis-positive { color: #ef4444; }
-        .basis-negative { color: #10b981; }
-        .na { color: #64748b; font-style: italic; }
-        
+
+        .card-title h2 {
+            color: #fbbf24;
+            font-size: 1.25rem;
+        }
+
+        .card-title .code {
+            color: #64748b;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+
+        /* TradingView 小工具容器 */
+        .tradingview-widget-container {
+            min-height: 120px;
+        }
+
+        /* 說明區 */
+        .info-card {
+            background: #0f172a;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border: 1px solid #334155;
+        }
+
+        .info-card p {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+
+        .info-card a {
+            color: #fbbf24;
+            text-decoration: none;
+        }
+
+        .info-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* 頁尾 */
         .footer {
             text-align: center;
             margin-top: 2rem;
@@ -61,83 +123,122 @@
             color: #475569;
             font-size: 0.7rem;
         }
-        .update-time {
-            text-align: right;
+
+        .footer a {
             color: #64748b;
-            font-size: 0.7rem;
-            margin-bottom: 1rem;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: #94a3b8;
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <!-- 頁首 -->
     <div class="header">
         <h1>🏭 台灣盛世國際化學</h1>
-        <p>塑膠原料 現貨 vs 期貨 報價表</p>
+        <p>塑膠原料即時報價｜期貨價格</p>
     </div>
-    
-    <div class="update-time">📅 更新時間：2026-05-28 01:33:33</div>
-    
+
+    <!-- 更新時間 -->
+    <div class="update-time" id="updateTime"></div>
+
+    <!-- PP 聚丙烯 -->
     <div class="card">
-        <table>
-            <thead>
-                <tr>
-                    <th>商品</th>
-                    <th>中文名稱</th>
-                    <th>生意社現貨 (元/噸)</th>
-                    <th>大商所期貨 (元/噸)</th>
-                    <th>基差 (現貨-期貨)</th>
-                </tr>
-            </thead>
-            <tbody>
-
-                <tr>
-                    <td><strong>PP</strong></td>
-                    <td>聚丙烯</td>
-                    <td><span class="na">未取得</span></td>
-                    <td><span class="na">無期貨</span></td>
-                    <td><span class="na">無法計算</span></td>
-                </tr>
-
-                <tr>
-                    <td><strong>LLDPE</strong></td>
-                    <td>線性低密度聚乙烯</td>
-                    <td><span class="na">未取得</span></td>
-                    <td><span class="na">無期貨</span></td>
-                    <td><span class="na">無法計算</span></td>
-                </tr>
-
-                <tr>
-                    <td><strong>ABS</strong></td>
-                    <td>ABS樹脂</td>
-                    <td><span class="na">未取得</span></td>
-                    <td><span class="na">無期貨</span></td>
-                    <td><span class="na">無法計算</span></td>
-                </tr>
-
-                <tr>
-                    <td><strong>PVC</strong></td>
-                    <td>聚氯乙烯</td>
-                    <td><span class="na">未取得</span></td>
-                    <td><span class="na">無期貨</span></td>
-                    <td><span class="na">無法計算</span></td>
-                </tr>
-
-                <tr>
-                    <td><strong>PC</strong></td>
-                    <td>聚碳酸酯</td>
-                    <td><span class="na">未取得</span></td>
-                    <td><span class="na">無期貨</span></td>
-                    <td><span class="na">無法計算</span></td>
-                </tr>
-
-            </tbody>
-        </table>
+        <div class="card-title">
+            <h2>📈 聚丙烯 (PP)</h2>
+            <span class="code">大商所代碼：PP</span>
+        </div>
+        <div class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+            {
+                "symbol": "DCE:PP",
+                "width": "100%",
+                "colorTheme": "dark",
+                "isTransparent": false,
+                "locale": "zh_TW"
+            }
+            </script>
+        </div>
     </div>
-    
+
+    <!-- LLDPE 線性低密度聚乙烯 -->
+    <div class="card">
+        <div class="card-title">
+            <h2>📈 線性低密度聚乙烯 (LLDPE)</h2>
+            <span class="code">大商所代碼：L</span>
+        </div>
+        <div class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+            {
+                "symbol": "DCE:L",
+                "width": "100%",
+                "colorTheme": "dark",
+                "isTransparent": false,
+                "locale": "zh_TW"
+            }
+            </script>
+        </div>
+    </div>
+
+    <!-- PVC 聚氯乙烯 -->
+    <div class="card">
+        <div class="card-title">
+            <h2>📈 聚氯乙烯 (PVC)</h2>
+            <span class="code">大商所代碼：V</span>
+        </div>
+        <div class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+            {
+                "symbol": "DCE:V",
+                "width": "100%",
+                "colorTheme": "dark",
+                "isTransparent": false,
+                "locale": "zh_TW"
+            }
+            </script>
+        </div>
+    </div>
+
+    <!-- ABS 和 PC 說明 -->
+    <div class="info-card">
+        <p>📌 <strong>關於 ABS 與 PC</strong><br>
+        ABS 樹脂和聚碳酸酯 (PC) 目前沒有在大連商品交易所上市期貨合約。<br>
+        如需這兩種原料的報價，建議參考：<br>
+        • <a href="https://www.100ppi.com/price/detail/abs" target="_blank">生意社 ABS 現貨價格</a><br>
+        • <a href="https://www.100ppi.com/price/detail/pc" target="_blank">生意社 PC 現貨價格</a>
+        </p>
+    </div>
+
+    <!-- 頁尾 -->
     <div class="footer">
-        📊 資料來源：生意社 (現貨) | 大連商品交易所 (期貨)
+        📊 資料來源：大連商品交易所 (DCE) ｜ 即時報價由 TradingView 提供<br>
+        <a href="/chemical-email-collector/index.html">📈 完整戰情室</a> | 
+        <a href="/chemical-email-collector/intelligence.html">📚 產業報告庫</a>
     </div>
 </div>
+
+<script>
+    // 顯示更新時間
+    const now = new Date();
+    const formattedTime = now.toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+    document.getElementById('updateTime').innerText = `📅 最後更新：${formattedTime}`;
+</script>
+
+<!-- TradingView 基礎腳本 -->
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </body>
 </html>
