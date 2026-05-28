@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>名片掃描王｜中文OCR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: #f0f4f8; padding: 16px 12px 100px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: white; border-radius: 32px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        h1 { font-size: 1.6rem; display: flex; align-items: center; gap: 10px; color: #1e293b; }
+        h3 { font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .sub { color: #64748b; font-size: 0.8rem; margin: 8px 0 16px; }
+        
+        /* 相機區域 */
+        .camera-area { background: #0f172a; border-radius: 28px; overflow: hidden; margin-bottom: 16px; }
+        .video-container { position: relative; aspect-ratio: 4/3; background: #000; display: flex; align-items: center; justify-content: center; }
+        #video { width: 100%; height: 100%; object-fit: cover; }
+        .preview-img { width: 100%; height: 100%; object-fit: contain; background: #0a0a0a; display: none; }
+        .camera-controls { display: flex; gap: 12px; padding: 12px; justify-content: center; }
+        .btn-camera { background: #3b82f6; border: none; padding: 12px 20px; border-radius: 60px; color: white; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+        .btn-camera:active { transform: scale(0.97); background: #2563eb; }
+        .btn-outline { background: #e2e8f0; border: none; padding: 12px 20px; border-radius: 60px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+        
+        /* 表單 */
+        .form-row { margin-bottom: 14px; }
+        .form-row label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: #475569; display: block; margin-bottom: 4px; }
+        .form-row input, .form-row textarea { width: 100%; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 0.9rem; background: #f8fafc; font-family: inherit; }
+        .form-row input:focus, .form-row textarea:focus { outline: none; border-color: #3b82f6; background: white; }
+        .action-buttons { display: flex; gap: 12px; margin-top: 16px; justify-content: flex-end; }
+        .btn-secondary { background: #e2e8f0; border: none; padding: 10px 18px; border-radius: 40px; font-weight: 500; cursor: pointer; }
+        .btn-primary { background: #3b82f6; border: none; padding: 10px 18px; border-radius: 40px; font-weight: 600; color: white; cursor: pointer; }
+        
+        /* 表格 */
+        .data-table { overflow-x: auto; }
+        .data-table table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .data-table th { background: #f1f5f9; padding: 10px 8px; text-align: left; }
+        .data-table td { padding: 10px 8px; border-top: 1px solid #eef2ff; }
+        .badge-empty { text-align: center; padding: 30px; color: #94a3b8; }
+        
+        /* 載入提示 */
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; visibility: hidden; flex-direction: column; gap: 16px; color: white; }
+        .spinner { width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .toast { position: fixed; bottom: 30px; left: 20px; right: 20px; background: #1e293b; color: white; padding: 12px; border-radius: 60px; text-align: center; font-size: 0.85rem; opacity: 0; transition: 0.2s; pointer-events: none; z-index: 1001; }
+        .progress-bar { width: 80%; background: rgba(255,255,255,0.2); border-radius: 10px; height: 6px; margin-top: 8px; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: #3b82f6; transition: width 0.3s; }
+        
+        .file-input { display: none; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1><i class="fas fa-id-card"></i> 名片掃描王</h1>
+        <div class="sub">拍照或選照片 ➜ 自動辨識中英文名片 ➜ 存入表格</div>
+        
+        <!-- 相機區塊 -->
+        <div class="camera-area">
+            <div class="video-container">
+                <video id="video" autoplay playsinline muted style="display:none;"></video>
+                <img id="previewImg" class="preview-img" style="display:block;">
+            </div>
+            <div class="camera-controls">
+                <button class="btn-camera" id="openCameraBtn"><i class="fas fa-camera"></i> 拍照</button>
+                <button class="btn-outline" id="uploadBtn"><i class="fas fa-image"></i> 選照片</button>
+                <button class="btn-outline" id="retakeBtn" style="display:none;"><i class="fas fa-redo"></i> 重拍</button>
+            </div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" capture="environment" class="file-input">
+        
+        <button class="btn-camera" id="recognizeBtn" style="width:100%; margin-top:8px; background:#10b981;"><i class="fas fa-microchip"></i> 開始辨識名片</button>
+    </div>
+    
+    <div class="card">
+        <h3><i class="fas fa-edit"></i> 名片資訊（可編輯）</h3>
+        <div class="form-row"><label>姓名</label><input type="text" id="nameField" placeholder="自動辨識"></div>
+        <div class="form-row"><label>公司 / 職稱</label><input type="text" id="companyField" placeholder="自動辨識"></div>
+        <div class="form-row"><label>電話</label><input type="tel" id="phoneField" placeholder="自動辨識"></div>
+        <div class="form-row"><label>電子郵件</label><input type="email" id="emailField" placeholder="自動辨識"></div>
+        <div class="form-row"><label>地址 / 網站</label><textarea id="addressField" rows="1" placeholder="自動辨識"></textarea></div>
+        <div class="action-buttons">
+            <button class="btn-secondary" id="clearFormBtn"><i class="fas fa-eraser"></i> 清空</button>
+            <button class="btn-primary" id="saveBtn"><i class="fas fa-save"></i> 存入表格</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="flex-between">
+            <h3><i class="fas fa-database"></i> 名片資料庫</h3>
+            <button class="btn-secondary" id="exportBtn" style="padding: 6px 14px;"><i class="fas fa-file-excel"></i> 匯出Excel</button>
+        </div>
+        <div class="data-table" id="tableContainer"><div class="badge-empty">暫無資料，掃描名片後儲存</div></div>
+    </div>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <div id="loadingText">載入OCR引擎中...<br><span style="font-size:12px;">首次使用需下載語言包(約12MB)</span></div>
+    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+</div>
+<div id="toastMsg" class="toast"></div>
+
+<script>
+    // ==================== 全域變數 ====================
+    let mediaStream = null;
+    let currentImageBlob = null;
+    let tesseractWorker = null;
+    let isOCRReady = false;
+    
+    let businessCards = [];
+    
+    // DOM 元素
+    const video = document.getElementById('video');
+    const previewImg = document.getElementById('previewImg');
+    const openCameraBtn = document.getElementById('openCameraBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const fileInput = document.getElementById('fileInput');
+    const recognizeBtn = document.getElementById('recognizeBtn');
+    const nameInp = document.getElementById('nameField');
+    const companyInp = document.getElementById('companyField');
+    const phoneInp = document.getElementById('phoneField');
+    const emailInp = document.getElementById('emailField');
+    const addressInp = document.getElementById('addressField');
+    const clearFormBtn = document.getElementById('clearFormBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const tableContainer = document.getElementById('tableContainer');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    const progressFill = document.getElementById('progressFill');
+    const toastMsg = document.getElementById('toastMsg');
+    
+    function showToast(msg, dur=2000) {
+        toastMsg.textContent = msg;
+        toastMsg.style.opacity = '1';
+        setTimeout(() => toastMsg.style.opacity = '0', dur);
+    }
+    
+    // 儲存與載入
+    function saveToLocal() { localStorage.setItem('business_cards', JSON.stringify(businessCards)); }
+    function loadFromLocal() {
+        const stored = localStorage.getItem('business_cards');
+        if(stored) try { businessCards = JSON.parse(stored); if(!Array.isArray(businessCards)) businessCards=[]; } catch(e){}
+        renderTable();
+    }
+    
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    
+    function renderTable() {
+        if(!businessCards.length) { tableContainer.innerHTML = '<div class="badge-empty">📭 尚無名片資料</div>'; return; }
+        const html = `<table style="min-width:500px;"><thead><tr><th>姓名</th><th>公司/職稱</th><th>電話</th><th>Email</th><th>地址/網站</th><th>操作</th></tr></thead><tbody>${
+            businessCards.map((c,i)=>`<tr>
+                <td>${escapeHtml(c.name||'—')}</td>
+                <td>${escapeHtml(c.company||'—')}</td>
+                <td>${escapeHtml(c.phone||'—')}</td>
+                <td>${escapeHtml(c.email||'—')}</td>
+                <td>${escapeHtml(c.address||'—')}</td>
+                <td><button class="del-btn" data-idx="${i}" style="background:none;border:none;color:#ef4444;font-size:1.2rem;"><i class="fas fa-trash-alt"></i></button></td>
+            </tr>`).join('')
+        }</tbody></table>`;
+        tableContainer.innerHTML = html;
+        document.querySelectorAll('.del-btn').forEach(btn=>{
+            btn.onclick = ()=>{
+                const idx = parseInt(btn.dataset.idx);
+                businessCards.splice(idx,1);
+                renderTable(); saveToLocal(); showToast('已刪除');
+            };
+        });
+    }
+    
+    // 預先載入 Tesseract 中文引擎
+    async function preloadTesseract() {
+        loadingOverlay.style.visibility = 'visible';
+        loadingText.innerHTML = '載入OCR引擎中...<br><span style="font-size:12px;">首次使用需下載語言包(約12MB)</span>';
+        progressFill.style.width = '0%';
+        
+        try {
+            if(typeof Tesseract === 'undefined') {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+            
+            loadingText.innerHTML = '載入繁體中文語言包...<br><span style="font-size:12px;">僅第一次需下載，約12MB</span>';
+            
+            tesseractWorker = await Tesseract.createWorker({
+                logger: m => {
+                    if(m.status === 'loading language' && m.progress) {
+                        let percent = Math.floor(m.progress * 100);
+                        progressFill.style.width = `${percent}%`;
+                        loadingText.innerHTML = `載入語言包 ${percent}%...`;
+                    }
+                    if(m.status === 'initializing api') {
+                        progressFill.style.width = '100%';
+                        loadingText.innerHTML = '初始化完成！';
+                    }
+                }
+            });
+            
+            await tesseractWorker.loadLanguage('chi_tra+eng');
+            await tesseractWorker.initialize('chi_tra+eng');
+            await tesseractWorker.setParameters({
+                tessedit_pageseg_mode: '6',
+                tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@.,-+()/ :#%&<>~!@#$%^&*()_+-=[]{}\\|;:\'"?/<>,。；：！？、一二三四五六七八九十百千萬公司有限公司科技企業集團股份顧問經理工程師博士教授協會大學學院行銷業務總監主任專員設計'
+            });
+            
+            isOCRReady = true;
+            showToast('OCR引擎已就緒，可以開始掃描名片', 2000);
+        } catch(err) {
+            console.error(err);
+            showToast('OCR載入失敗，請檢查網路後重整頁面', 3000);
+        } finally {
+            loadingOverlay.style.visibility = 'hidden';
+        }
+    }
+    
+    // 從圖片 Blob 進行 OCR 辨識
+    async function recognizeImage(blob) {
+        if(!isOCRReady || !tesseractWorker) {
+            showToast('OCR引擎尚未載入完成，請稍後', 1500);
+            return null;
+        }
+        
+        loadingOverlay.style.visibility = 'visible';
+        loadingText.innerHTML = '辨識名片文字中...<br><span style="font-size:12px;">請稍候</span>';
+        progressFill.style.width = '50%';
+        
+        try {
+            const img = new Image();
+            const url = URL.createObjectURL(blob);
+            await new Promise((resolve) => { img.onload = resolve; img.src = url; });
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            URL.revokeObjectURL(url);
+            
+            progressFill.style.width = '80%';
+            loadingText.innerHTML = '進行文字辨識中...';
+            
+            const { data: { text } } = await tesseractWorker.recognize(canvas);
+            return text;
+        } catch(err) {
+            console.error(err);
+            return null;
+        } finally {
+            loadingOverlay.style.visibility = 'hidden';
+        }
+    }
+    
+    // 智慧解析名片文字
+    function parseAndFill(text) {
+        if(!text || !text.trim()) { showToast('未辨識到文字，請確認名片清晰'); return false; }
+        
+        const lines = text.split(/\r?\n/);
+        const full = text;
+        
+        // Email
+        const emailMatch = full.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        if(emailMatch) emailInp.value = emailMatch[0];
+        
+        // 電話
+        const phonePatterns = [/09\d{2}-?\d{3}-?\d{3}/, /0\d{1,2}-?\d{4,5}-?\d{3,4}/, /\+886-?\d{1,2}-?\d{4,5}-?\d{3,4}/];
+        for(let p of phonePatterns) {
+            let m = full.match(p);
+            if(m) { phoneInp.value = m[0]; break; }
+        }
+        
+        // 姓名
+        for(let line of lines) {
+            line = line.trim();
+            if(!line || line.length<2 || line.length>12) continue;
+            if(line.match(/(公司|有限|股份|集團|企業|科技|顧問|經理|工程師|博士|教授|協會|大學|學院|行銷|業務|總監|主任)/i)) continue;
+            if(line.match(/[a-zA-Z\u4e00-\u9fa5]/)) { nameInp.value = line; break; }
+        }
+        
+        // 公司/職位
+        let companyMatch = '', titleMatch = '';
+        for(let line of lines) {
+            if(line.match(/(公司|集團|企業|科技|工業|股份|基金會|協會|大學|事務所|銀行|保險|有限)/i) && !companyMatch) companyMatch = line;
+            if(line.match(/(總經理|經理|副理|協理|工程師|設計師|專員|主任|總監|執行長|助理|業務|顧問)/i) && !titleMatch) titleMatch = line;
+        }
+        if(companyMatch && titleMatch) companyInp.value = `${companyMatch} · ${titleMatch}`;
+        else if(companyMatch) companyInp.value = companyMatch;
+        else if(titleMatch) companyInp.value = titleMatch;
+        
+        // 地址
+        const addrMatch = full.match(/[\u4e00-\u9fa5]{2,}(?:市|縣|區|鎮|鄉|村|街|路|段|巷|弄|號|樓|室)/);
+        if(addrMatch) addressInp.value = addrMatch[0];
+        
+        return true;
+    }
+    
+    // 拍照流程
+    async function startCamera() {
+        if(mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } });
+            mediaStream = stream;
+            video.srcObject = stream;
+            video.style.display = 'block';
+            previewImg.style.display = 'none';
+            await video.play();
+            retakeBtn.style.display = 'inline-flex';
+            showToast('相機已開啟，按下「開始辨識」拍攝', 2000);
+        } catch(err) {
+            showToast('無法開啟相機，請使用「選照片」功能', 2000);
+        }
+    }
+    
+    function capturePhoto() {
+        if(!video.srcObject || video.style.display === 'none') {
+            showToast('請先開啟相機', 1000);
+            return false;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        canvas.toBlob(blob => {
+            currentImageBlob = blob;
+            const url = URL.createObjectURL(blob);
+            previewImg.src = url;
+            previewImg.style.display = 'block';
+            video.style.display = 'none';
+            URL.revokeObjectURL(url);
+            showToast('已拍照，點擊「開始辨識」', 1500);
+        }, 'image/jpeg', 0.9);
+        return true;
+    }
+    
+    function handleImageFile(file) {
+        if(!file) return;
+        currentImageBlob = file;
+        const url = URL.createObjectURL(file);
+        previewImg.src = url;
+        previewImg.style.display = 'block';
+        video.style.display = 'none';
+        if(mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+        showToast('已選取照片，點擊「開始辨識」', 1500);
+    }
+    
+    // 事件綁定
+    openCameraBtn.onclick = startCamera;
+    uploadBtn.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => { if(e.target.files[0]) handleImageFile(e.target.files[0]); };
+    retakeBtn.onclick = startCamera;
+    
+    recognizeBtn.onclick = async () => {
+        if(!currentImageBlob) {
+            if(video.style.display !== 'none') capturePhoto();
+            else { showToast('請先拍照或選取照片', 1000); return; }
+        }
+        if(!currentImageBlob) return;
+        const ocrText = await recognizeImage(currentImageBlob);
+        if(ocrText) {
+            parseAndFill(ocrText);
+            showToast('✅ 辨識完成！請檢查資訊後存入表格', 2000);
+        } else {
+            showToast('辨識失敗，請重拍或確認名片清晰', 2000);
+        }
+    };
+    
+    clearFormBtn.onclick = () => {
+        nameInp.value = companyInp.value = phoneInp.value = emailInp.value = addressInp.value = '';
+        currentImageBlob = null;
+        previewImg.src = '';
+        previewImg.style.display = 'block';
+        video.style.display = 'none';
+        showToast('已清空');
+    };
+    
+    saveBtn.onclick = () => {
+        const name = nameInp.value.trim();
+        const company = companyInp.value.trim();
+        const phone = phoneInp.value.trim();
+        const email = emailInp.value.trim();
+        const address = addressInp.value.trim();
+        if(!name && !company && !phone && !email && !address) {
+            showToast('沒有資料可儲存', 1000);
+            return;
+        }
+        businessCards.unshift({ name, company, phone, email, address, timestamp: new Date().toISOString() });
+        renderTable();
+        saveToLocal();
+        showToast('✓ 已存入名片庫');
+        clearFormBtn.click();
+    };
+    
+    exportBtn.onclick = () => {
+        if(!businessCards.length) { showToast('無資料可匯出'); return; }
+        const sheetData = [["姓名","公司/職稱","電話","電子郵件","地址/網站","建立時間"]];
+        businessCards.forEach(c => sheetData.push([c.name||'', c.company||'', c.phone||'', c.email||'', c.address||'', c.timestamp?new Date(c.timestamp).toLocaleString():'']));
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "名片資料庫");
+        XLSX.writeFile(wb, `名片資料_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.xlsx`);
+        showToast('匯出成功');
+    };
+    
+    // 初始化
+    loadFromLocal();
+    preloadTesseract();
+</script>
+</body>
+</html>
