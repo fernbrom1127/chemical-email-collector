@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>名片快掃王 - 極速辨識</title>
+    <title>極速名片辨識王 | 離線即時 OCR</title>
     <!-- Google Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Tesseract OCR 核心，但我們採用更輕量的 CDN 與精簡語言 (僅 eng+chi_sim 加快) -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <!-- SheetJS 匯出 Excel -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <!-- Tesseract 雖然輕量但仍需下載語言，為了避免超時，改用純前端離線 OCR 方案: Ocrad.js (純JS，無需下載語言包，極速) -->
+    <script src="https://cdn.jsdelivr.net/npm/ocrad.js@0.2.2/ocrad.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -273,8 +273,8 @@
 <body>
 <div class="app-container">
     <header>
-        <h1><i class="fas fa-id-card"></i> 名片快掃王</h1>
-        <p>對準名片 • 一秒辨識 • 存入表格</p>
+        <h1><i class="fas fa-id-card"></i> 極速名片王</h1>
+        <p>離線OCR • 瞬間辨識 • 存入表格</p>
     </header>
 
     <!-- 相機預覽區塊 (無鏡像) -->
@@ -324,7 +324,7 @@
     <div class="data-table" id="dataTableContainer">
         <div class="badge-empty">暫無資料，點擊掃描或新增名片</div>
     </div>
-    <footer>✔ 相機無鏡像 ✔ 輕量化OCR辨識中英文 ✔ 可編輯後儲存</footer>
+    <footer>✔ 離線OCR無網路延遲 ✔ 相機無鏡像 ✔ 智慧填寫姓名/電話/公司/信箱</footer>
 </div>
 
 <div id="loadingOverlay" class="loading-spinner">
@@ -336,7 +336,6 @@
 <script>
     // ---------- 全域變數 ----------
     let mediaStream = null;
-    let ocrTimeoutId = null;
     const videoElem = document.getElementById('video');
     const snapBtn = document.getElementById('snapBtn');
     const nameInput = document.getElementById('nameField');
@@ -499,72 +498,72 @@
         }
     }
 
-    // 智慧OCR解析 (輕量規則)
-    function smartParseOcr(ocrText) {
-        if (!ocrText) return;
-        const lines = ocrText.split(/\r?\n/);
-        const fullText = ocrText;
+    // 增強版 OCR 後處理：從 OCRA 文字中擷取欄位 (極快，完全離線)
+    function advancedParseOcr(rawText) {
+        if (!rawText) return;
+        // 清理文字，保留換行
+        const lines = rawText.split(/\r?\n/);
+        const fullText = rawText;
         
-        // 信箱
+        // 1. 電子郵件
         const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
         const emailMatch = fullText.match(emailRegex);
         if (emailMatch) emailInput.value = emailMatch[0];
         
-        // 電話
-        const phoneRegex = /(\+?[\d\s\-\(\)]{8,20})/g;
-        let phoneMatches = [...fullText.matchAll(phoneRegex)];
+        // 2. 電話 (支援多國格式)
+        let phonePattern = /(\+?[0-9]{1,4}[-.\s]?)?\(?[0-9]{2,5}\)?[-.\s]?[0-9]{3,5}[-.\s]?[0-9]{3,6}/g;
+        let phoneMatches = [...fullText.matchAll(phonePattern)];
         let foundPhone = '';
         for (let match of phoneMatches) {
             let candidate = match[0].trim();
-            if (candidate.length >= 8 && (candidate.match(/\d/g) || []).length >= 7) {
+            let digits = candidate.replace(/\D/g, '').length;
+            if (digits >= 8 && digits <= 15) {
                 foundPhone = candidate;
                 break;
             }
         }
         if (foundPhone) phoneInput.value = foundPhone;
         
-        // 姓名 (過濾公司/職位關鍵字)
+        // 3. 姓名：過濾公司或職位關鍵字，取最短且不包含特殊符號的行
         let possibleName = '';
         for (let line of lines) {
             line = line.trim();
             if (!line) continue;
-            if (emailMatch && line.includes(emailMatch[0])) continue;
-            if (foundPhone && line.includes(foundPhone)) continue;
-            if (line.match(/(公司|有限公司|股份|集團|企業|科技|商務|顧問|經理|工程師|博士|教授|協會|中心|院|大學|學院|行銷|業務|總監|主任|專員|設計|師|律師|會計)/i)) continue;
-            if (line.length > 1 && line.length < 25 && !line.match(/^[\d\-\+\s\(\)]+$/)) {
-                possibleName = line;
-                break;
-            }
+            if (line.length < 2 || line.length > 20) continue;
+            if (line.match(/(公司|有限|股份|集團|企業|科技|顧問|經理|工程師|博士|教授|協會|大學|學院|行銷|業務|總監|主任|專員|設計|師|律師|會計|醫師|總經理|執行長|副理|協理|助理)/i)) continue;
+            if (line.match(emailRegex) || line.match(phonePattern)) continue;
+            if (!line.match(/[a-zA-Z\u4e00-\u9fff]/)) continue;
+            possibleName = line;
+            break;
         }
         if (possibleName) nameInput.value = possibleName;
-        else if (lines[0] && lines[0].length < 28 && !lines[0].match(/(公司|股份|電話|@|www)/i)) nameInput.value = lines[0];
+        else if (lines[0] && lines[0].length < 25) nameInput.value = lines[0];
         
-        // 公司與職位
+        // 4. 公司與職位 (分別萃取)
         let companyLine = '';
         let titleLine = '';
         for (let line of lines) {
-            if (line.match(/(公司|集團|企業|商行|行銷|顧問|科技|工業|股份|基金會|協會|大學|學院|事務所|銀行|保險|有限|股份)/i) && !line.match(emailRegex) && !line.match(phoneRegex)) {
-                companyLine = line;
-                break;
+            if (line.match(/(公司|集團|企業|商行|行銷|顧問|科技|工業|股份|基金會|協會|大學|學院|事務所|銀行|保險|有限|股份|中心|社|財團法人)/i)) {
+                if (!companyLine) companyLine = line;
             }
         }
         for (let line of lines) {
-            if (line.match(/(總經理|經理|副理|協理|工程師|設計師|專員|主任|總監|執行長|助理|業務|財務|行銷|管理師|顧問|律師|醫師|會計師|教授|博士)/i) && !line.match(emailRegex) && !line.match(phoneRegex)) {
-                titleLine = line;
+            if (line.match(/(總經理|經理|副理|協理|工程師|設計師|專員|主任|總監|執行長|助理|業務|財務|行銷|管理師|顧問|律師|醫師|會計師|教授|博士|秘書|代表)/i)) {
+                if (!titleLine) titleLine = line;
                 break;
             }
         }
         let finalCompany = companyLine || '';
-        if (titleLine && finalCompany) finalCompany = `${finalCompany} · ${titleLine}`;
+        if (titleLine && finalCompany && !finalCompany.includes(titleLine)) finalCompany = `${finalCompany} · ${titleLine}`;
         else if (titleLine && !finalCompany) finalCompany = titleLine;
         if (finalCompany) companyInput.value = finalCompany;
         
-        // 地址/網址
+        // 5. 網址 & 地址
         let webOrAddr = '';
         const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/i;
         const urlMatch = fullText.match(urlRegex);
         if (urlMatch) webOrAddr = urlMatch[0];
-        const addrRegex = /([\u4e00-\u9fa5]{2,}(?:市|縣|區|鎮|鄉|村|街|路|段|巷|弄|號|樓|室))/;
+        const addrRegex = /([\u4e00-\u9fa5]{2,}(?:市|縣|區|鎮|鄉|村|街|路|段|巷|弄|號|樓|室|之))/;
         const addrMatch = fullText.match(addrRegex);
         if (addrMatch) {
             if (webOrAddr) webOrAddr = webOrAddr + " " + addrMatch[0];
@@ -572,10 +571,10 @@
         }
         if (webOrAddr) addressInput.value = webOrAddr;
         
-        // 若公司仍空白，嘗試擷取全大寫英文組合
+        // 補強: 如果公司依然是空，且有些英文大寫縮寫 (像是 ABC Corp.)
         if (!companyInput.value.trim()) {
             for (let line of lines) {
-                if (line.length > 2 && line.length < 40 && line.match(/[A-Z]{2,}/) && !line.match(/(電話|email|@|www|LINE|FAX)/i)) {
+                if (line.length > 2 && line.length < 50 && line.match(/[A-Z]{2,}/) && !line.match(/(電話|EMAIL|HTTP|WWW|TEL|FAX)/i)) {
                     companyInput.value = line;
                     break;
                 }
@@ -583,53 +582,67 @@
         }
     }
     
-    // 改良OCR核心：使用輕量語言包 eng+chi_sim 快速，加上超時保護
-    async function performOCR(imageBlob) {
-        // 設置超時保護 (12秒)
-        const timeoutPromise = new Promise((_, reject) => {
-            ocrTimeoutId = setTimeout(() => reject(new Error("OCR_TIMEOUT")), 12000);
-        });
-        
-        const ocrPromise = (async () => {
-            // 使用輕量化模型 eng+chi_sim (簡體但支援大部分繁體)
-            const worker = await Tesseract.createWorker({
-                logger: m => {
-                    if (m.status === 'recognizing text') {
-                        loadingTextSpan.innerText = `辨識中... ${Math.floor(m.progress * 100)}%`;
-                    }
+    // 使用 Ocrad.js 進行純前端離線OCR (保證無需下載語言包，毫秒級)
+    async function performFastOcr(imageBlob) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(imageBlob);
+            img.onload = () => {
+                // 建立 canvas 縮放至適當大小 (增加辨識速度，同時維持品質)
+                const canvas = document.createElement('canvas');
+                let w = img.width;
+                let h = img.height;
+                const maxDim = 1200;
+                if (w > maxDim) { h = (h * maxDim) / w; w = maxDim; }
+                if (h > maxDim) { w = (w * maxDim) / h; h = maxDim; }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                // 增強對比二值化
+                const imageData = ctx.getImageData(0, 0, w, h);
+                const data = imageData.data;
+                for (let i = 0; i < data.length; i += 4) {
+                    let r = data[i];
+                    let g = data[i+1];
+                    let b = data[i+2];
+                    let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                    let threshold = 160;
+                    let val = gray > threshold ? 255 : 0;
+                    data[i] = val;
+                    data[i+1] = val;
+                    data[i+2] = val;
                 }
-            });
-            await worker.loadLanguage('eng+chi_sim');
-            await worker.initialize('eng+chi_sim');
-            // 設定參數提升名片辨識率
-            await worker.setParameters({
-                tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@.,-+()/ :#%$&<>~!@#$%^&*()_+=-{}[]|\\:;"\'?/<>,.的一二是三是四是五是六是七是八是九是十公司有限公司股份集團科技企業顧問經理工程師博士教授協會大學學院行銷業務總監主任專員設計師電話傳真郵件信箱地址台北市新北市桃園市台中市台南市高雄市',
-                preserve_interword_spaces: '1'
-            });
-            const { data: { text } } = await worker.recognize(imageBlob);
-            await worker.terminate();
-            return text;
-        })();
-        
-        try {
-            const result = await Promise.race([ocrPromise, timeoutPromise]);
-            if (ocrTimeoutId) clearTimeout(ocrTimeoutId);
-            return result;
-        } catch (err) {
-            if (ocrTimeoutId) clearTimeout(ocrTimeoutId);
-            throw err;
-        }
+                ctx.putImageData(imageData, 0, 0);
+                try {
+                    // 使用 Ocrad 辨識 (同步但非常快)
+                    const ocrResult = OCRAD(canvas, { 
+                        layout: 'text',
+                        whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@.,-+()/: #%&<>~!@#$%^&*()_+-=[]{}|\\;:\'\"?/<>，。、；：！？【】「」『』（）《》一二三四五六七八九十公司有限公司科技企業集團股份顧問'
+                    });
+                    resolve(ocrResult || '');
+                } catch(e) {
+                    reject(e);
+                } finally {
+                    URL.revokeObjectURL(url);
+                }
+            };
+            img.onerror = (err) => {
+                URL.revokeObjectURL(url);
+                reject(err);
+            };
+            img.src = url;
+        });
     }
-
+    
     async function captureAndOCR() {
         if (!videoElem.videoWidth || !videoElem.videoHeight) {
             showToast("相機尚未準備好，請稍後", 1000);
             return;
         }
         loadingOverlay.style.visibility = "visible";
-        loadingTextSpan.innerText = "準備影像中...";
+        loadingTextSpan.innerText = "影像處理中...";
         
-        // 擷取高品質frame
         const canvas = document.createElement('canvas');
         const width = videoElem.videoWidth;
         const height = videoElem.videoHeight;
@@ -638,47 +651,47 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoElem, 0, 0, width, height);
         
-        // 可加強對比度以提升辨識 (快速處理)
+        // 二值化增強對比 (提升OCR準確性)
         const imageData = ctx.getImageData(0, 0, width, height);
         const data = imageData.data;
         for (let i = 0; i < data.length; i += 4) {
-            const brightness = 0.34 * data[i] + 0.5 * data[i+1] + 0.16 * data[i+2];
-            const threshold = 140;
-            const val = brightness > threshold ? 255 : 0;
-            data[i] = val;     // R
-            data[i+1] = val;   // G
-            data[i+2] = val;   // B
+            let r = data[i];
+            let g = data[i+1];
+            let b = data[i+2];
+            let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+            let threshold = 140;
+            let bw = gray > threshold ? 255 : 0;
+            data[i] = bw;
+            data[i+1] = bw;
+            data[i+2] = bw;
         }
         ctx.putImageData(imageData, 0, 0);
         
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.82));
         if (!blob) {
             loadingOverlay.style.visibility = "hidden";
-            showToast("擷取影像失敗", 1000);
+            showToast("擷取失敗", 1000);
             return;
         }
         
         try {
-            const recognizedText = await performOCR(blob);
-            if (recognizedText && recognizedText.trim().length > 0) {
-                smartParseOcr(recognizedText);
-                showToast("辨識完成！請核對欄位後儲存", 1800);
+            loadingTextSpan.innerText = "OCR 快速辨識中...";
+            const recognizedText = await performFastOcr(blob);
+            if (recognizedText && recognizedText.trim().length > 5) {
+                advancedParseOcr(recognizedText);
+                showToast("✓ 辨識完成！請核對後儲存", 1600);
             } else {
-                showToast("未偵測到文字，請確認名片光線充足、角度平整", 2000);
+                showToast("未偵測到文字，請確保名片光線均勻且對焦", 2000);
             }
         } catch (err) {
             console.error(err);
-            if (err.message === "OCR_TIMEOUT") {
-                showToast("辨識超時，請確認網路或重試，建議光線充足下拍攝", 2500);
-            } else {
-                showToast("辨識失敗，請再試一次或手動填寫", 2000);
-            }
+            showToast("辨識錯誤，請重新拍攝或手動填寫", 2000);
         } finally {
             loadingOverlay.style.visibility = "hidden";
             loadingTextSpan.innerText = "辨識名片中，請稍後...";
         }
     }
-
+    
     function clearForm() {
         nameInput.value = '';
         companyInput.value = '';
@@ -687,7 +700,7 @@
         addressInput.value = '';
         showToast('表單已清空', 800);
     }
-
+    
     // 事件綁定
     snapBtn.addEventListener('click', captureAndOCR);
     clearFormBtn.addEventListener('click', clearForm);
@@ -696,9 +709,8 @@
     
     window.addEventListener('beforeunload', () => {
         if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
-        if (ocrTimeoutId) clearTimeout(ocrTimeoutId);
     });
-
+    
     initCamera();
     loadFromLocalStorage();
 </script>
