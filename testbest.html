@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>名片掃描神器｜Google Lens + 自動解析</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* 上半部：Google Lens 區域 */
+        .scanner-area {
+            background: #0f172a;
+            padding: 12px 16px 8px;
+            border-bottom: 2px solid #334155;
+            flex-shrink: 0;
+        }
+        
+        .scanner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .scanner-header h2 {
+            color: white;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .scanner-header h2 i {
+            color: #34a853;
+        }
+        
+        .badge {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+        }
+        
+        /* Google Lens 嵌入區 */
+        .lens-iframe-container {
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
+            height: 280px;
+            position: relative;
+        }
+        
+        .lens-iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* 替代方案：按鈕區（手機上更實用） */
+        .lens-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .lens-btn {
+            flex: 1;
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 14px 12px;
+            border-radius: 60px;
+            color: white;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .lens-btn:active {
+            transform: scale(0.97);
+            background: #334155;
+        }
+        
+        .lens-btn.google-color {
+            background: #1a73e8;
+            border-color: #1a73e8;
+        }
+        
+        .lens-btn.google-color i {
+            color: white;
+        }
+        
+        .lens-btn.apple-color {
+            background: #000;
+            border-color: #3a3a3a;
+        }
+        
+        .copy-tip {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 10px 16px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .copy-tip span {
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+        
+        .copy-tip .shortcut {
+            background: #0f172a;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-family: monospace;
+            color: #facc15;
+        }
+        
+        /* 下半部：名片解析工具 */
+        .tool-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #f1f5f9;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .card h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            resize: vertical;
+            background: #fafcff;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .parse-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            width: 100%;
+            margin: 12px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .form-row {
+            margin-bottom: 14px;
+        }
+        
+        .form-row label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #475569;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .form-row input, .form-row textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            background: #f8fafc;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .data-table {
+            overflow-x: auto;
+        }
+        
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+        
+        .data-table th {
+            background: #f1f5f9;
+            padding: 8px 6px;
+            text-align: left;
+        }
+        
+        .data-table td {
+            padding: 8px 6px;
+            border-top: 1px solid #eef2ff;
+        }
+        
+        .badge-empty {
+            text-align: center;
+            padding: 30px;
+            color: #94a3b8;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #1e293b;
+            color: white;
+            padding: 10px;
+            border-radius: 60px;
+            text-align: center;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .badge-count {
+            display: inline-block;
+            background: #e2e8f0;
+            border-radius: 40px;
+            padding: 2px 8px;
+            font-size: 0.65rem;
+            margin-left: 6px;
+        }
+        
+        /* 手機優化 */
+        @media (max-width: 600px) {
+            .lens-iframe-container {
+                height: 220px;
+            }
+            
+            .lens-btn span {
+                font-size: 0.75rem;
+            }
+            
+            .tool-area {
+                padding: 12px;
+            }
+        }
+        
+        /* 快捷貼上按鈕 */
+        .quick-paste {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .quick-paste button {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 上半部：掃描區 -->
+<div class="scanner-area">
+    <div class="scanner-header">
+        <h2><i class="fas fa-camera"></i> 掃描名片</h2>
+        <div class="badge"><i class="fas fa-mobile-alt"></i> 手機效果最佳</div>
+    </div>
+    
+    <!-- 使用 Google Lens 的快速按鈕（手機上會直接開啟 App） -->
+    <div class="lens-buttons">
+        <a href="https://lens.google/" target="_blank" class="lens-btn google-color">
+            <i class="fab fa-google"></i> <span>📱 開啟 Google Lens</span>
+        </a>
+        <button id="openCameraBtn" class="lens-btn">
+            <i class="fas fa-camera"></i> <span>📸 開啟相機</span>
+        </button>
+    </div>
+    
+    <div class="copy-tip">
+        <span><i class="fas fa-lightbulb"></i> 掃描後長按文字 → 複製 → 貼到下方</span>
+        <span class="shortcut"><i class="fas fa-paste"></i> Ctrl+V / ⌘+V</span>
+    </div>
+</div>
+
+<!-- 下半部：名片解析工具 -->
+<div class="tool-area">
+    <div class="container">
+        <!-- 貼上區域 -->
+        <div class="card">
+            <h3><i class="fas fa-paste"></i> 貼上名片文字</h3>
+            <textarea id="ocrText" placeholder="📋 貼上從 Google Lens 複製的名片文字&#10;&#10;例如：&#10;陳美惠&#10;雲端科技股份有限公司 行銷總監&#10;電話：0912-345-678&#10;Email：mei@cloud.com"></textarea>
+            <div class="quick-paste">
+                <button id="pasteBtn"><i class="fas fa-paste"></i> 貼上</button>
+                <button id="exampleBtn"><i class="fas fa-code"></i> 範例文字</button>
+                <button id="clearTextBtn"><i class="fas fa-eraser"></i> 清空</button>
+            </div>
+            <button class="parse-btn" id="parseBtn"><i class="fas fa-magic"></i> 🔍 智慧解析名片</button>
+        </div>
+        
+        <!-- 編輯/儲存 -->
+        <div class="card">
+            <h3><i class="fas fa-edit"></i> 編輯 / 儲存</h3>
+            <div class="form-row"><label>📛 姓名</label><input type="text" id="nameField" placeholder="自動填入"></div>
+            <div class="form-row"><label>🏢 公司 / 職稱</label><input type="text" id="companyField" placeholder="自動填入"></div>
+            <div class="form-row"><label>📞 電話</label><input type="tel" id="phoneField" placeholder="自動填入"></div>
+            <div class="form-row"><label>✉️ 電子郵件</label><input type="email" id="emailField" placeholder="自動填入"></div>
+            <div class="form-row"><label>📍 地址 / 網站</label><textarea id="addressField" rows="1" placeholder="自動填入"></textarea></div>
+            <div class="action-buttons">
+                <button class="btn-secondary" id="clearFormBtn"><i class="fas fa-eraser"></i> 清空表單</button>
+                <button class="btn-danger" id="clearAllBtn"><i class="fas fa-trash-alt"></i> 清空資料庫</button>
+                <button class="btn-primary" id="saveBtn"><i class="fas fa-save"></i> 存入表格</button>
+            </div>
+        </div>
+        
+        <!-- 資料庫 -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <h3><i class="fas fa-database"></i> 名片資料庫 <span id="cardCount" class="badge-count">0</span></h3>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-secondary" id="exportBtn" style="padding: 6px 12px;"><i class="fas fa-file-excel"></i> 匯出</button>
+                </div>
+            </div>
+            <div class="data-table" id="tableContainer"><div class="badge-empty">暫無資料</div></div>
+        </div>
+    </div>
+</div>
+
+<div id="toastMsg" class="toast"></div>
+
+<script>
+    // ========== 資料庫操作 ==========
+    let businessCards = [];
+    const nameInp = document.getElementById('nameField');
+    const companyInp = document.getElementById('companyField');
+    const phoneInp = document.getElementById('phoneField');
+    const emailInp = document.getElementById('emailField');
+    const addressInp = document.getElementById('addressField');
+    const ocrTextarea = document.getElementById('ocrText');
+    const parseBtn = document.getElementById('parseBtn');
+    const clearFormBtn = document.getElementById('clearFormBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const clearTextBtn = document.getElementById('clearTextBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const exampleBtn = document.getElementById('exampleBtn');
+    const pasteBtn = document.getElementById('pasteBtn');
+    const openCameraBtn = document.getElementById('openCameraBtn');
+    const tableContainer = document.getElementById('tableContainer');
+    const toastMsg = document.getElementById('toastMsg');
+    const cardCountSpan = document.getElementById('cardCount');
+    
+    function showToast(msg, dur=2000) {
+        toastMsg.textContent = msg;
+        toastMsg.style.opacity = '1';
+        setTimeout(() => toastMsg.style.opacity = '0', dur);
+    }
+    
+    function saveToLocal() { 
+        localStorage.setItem('business_cards', JSON.stringify(businessCards)); 
+        cardCountSpan.textContent = businessCards.length;
+    }
+    
+    function loadFromLocal() {
+        const stored = localStorage.getItem('business_cards');
+        if(stored) try { businessCards = JSON.parse(stored); if(!Array.isArray(businessCards)) businessCards=[]; } catch(e){}
+        renderTable();
+        cardCountSpan.textContent = businessCards.length;
+    }
+    
+    function renderTable() {
+        if(!businessCards.length) { tableContainer.innerHTML = '<div class="badge-empty">📭 尚無名片資料</div>'; return; }
+        const html = `<table style="min-width:450px;"><thead><tr><th>姓名</th><th>公司/職稱</th><th>電話</th><th>Email</th><th>地址</th><th>操作</th></tr></thead><tbody>${
+            businessCards.map((c,i)=>`<tr>
+                <td>${escapeHtml(c.name||'—')}</td>
+                <td>${escapeHtml(c.company||'—')}</td>
+                <td>${escapeHtml(c.phone||'—')}</td>
+                <td>${escapeHtml(c.email||'—')}</td>
+                <td>${escapeHtml(c.address||'—')}</td>
+                <td><button class="del-btn" data-idx="${i}" style="background:none;border:none;color:#ef4444;font-size:1rem;cursor:pointer;"><i class="fas fa-trash-alt"></i></button></td>
+            </tr>`).join('')
+        }</tbody></table>`;
+        tableContainer.innerHTML = html;
+        document.querySelectorAll('.del-btn').forEach(btn=>{
+            btn.onclick = ()=>{
+                const idx = parseInt(btn.dataset.idx);
+                businessCards.splice(idx,1);
+                renderTable(); saveToLocal(); showToast('已刪除');
+            };
+        });
+    }
+    
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    
+    // ========== 解析函數 ==========
+    function parseAndFill(text) {
+        if(!text.trim()) { showToast('請貼上名片文字',1000); return false; }
+        
+        const lines = text.split(/\r?\n/);
+        const full = text;
+        
+        // Email
+        const emailMatch = full.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        emailInp.value = emailMatch ? emailMatch[0] : '';
+        
+        // 電話
+        let phonePatterns = [/09\d{2}-?\d{3}-?\d{3}/, /09\d{8}/, /0\d{1,2}-?\d{6,8}/, /\+886-?\d{1,2}-?\d{6,8}/];
+        let foundPhone = '';
+        for(let pattern of phonePatterns) {
+            let match = full.match(pattern);
+            if(match) { foundPhone = match[0]; break; }
+        }
+        phoneInp.value = foundPhone || '';
+        
+        // 姓名
+        let foundName = '';
+        let nameKeywordMatch = full.match(/(?:姓名|名字)[：:]\s*([^\s\n]{2,4})/);
+        if(nameKeywordMatch) foundName = nameKeywordMatch[1];
+        if(!foundName) {
+            for(let line of lines) {
+                line = line.trim();
+                if(line.length >= 2 && line.length <= 4 && /^[\u4e00-\u9fa5]+$/.test(line)) {
+                    const exclude = ["公司", "有限", "股份", "集團", "企業", "科技", "顧問", "協會"];
+                    let excluded = false;
+                    for(let w of exclude) if(line.includes(w)) { excluded = true; break; }
+                    if(!excluded) { foundName = line; break; }
+                }
+            }
+        }
+        nameInp.value = foundName || '';
+        
+        // 公司 & 職稱
+        let foundCompany = '', foundTitle = '';
+        for(let line of lines) {
+            if(line.match(/(公司|集團|企業|科技|工業|股份|基金會|協會|事務所|銀行|保險|有限)/i)) {
+                if(!foundCompany) foundCompany = line;
+            }
+            if(line.match(/(總經理|經理|副理|協理|工程師|設計師|專員|主任|總監|執行長|助理|業務|財務|行銷|顧問|律師|醫師)/i)) {
+                if(!foundTitle) foundTitle = line;
+            }
+        }
+        let finalCompany = foundCompany || '';
+        if(foundTitle && !finalCompany.includes(foundTitle)) finalCompany = `${finalCompany} ${foundTitle}`.trim();
+        else if(foundTitle && !finalCompany) finalCompany = foundTitle;
+        companyInp.value = finalCompany || '';
+        
+        // 地址
+        let addrMatch = full.match(/[\u4e00-\u9fa5]{2,}(?:市|縣|區|鎮|鄉|村|街|路|段|巷|弄|號|樓|室)[^\n]{0,50}/);
+        if(addrMatch) addressInp.value = addrMatch[0];
+        else {
+            let urlMatch = full.match(/(https?:\/\/[^\s]+|www\.[^\s]+)/i);
+            addressInp.value = urlMatch ? urlMatch[0] : '';
+        }
+        
+        return true;
+    }
+    
+    // ========== 事件綁定 ==========
+    parseBtn.onclick = () => {
+        const rawText = ocrTextarea.value;
+        if(!rawText.trim()) { showToast('請先貼上名片文字'); return; }
+        parseAndFill(rawText);
+        showToast('✅ 解析完成，請檢查欄位後儲存');
+    };
+    
+    clearFormBtn.onclick = () => {
+        nameInp.value = companyInp.value = phoneInp.value = emailInp.value = addressInp.value = '';
+        showToast('已清空表單');
+    };
+    
+    clearTextBtn.onclick = () => {
+        ocrTextarea.value = '';
+        showToast('已清空文字');
+    };
+    
+    clearAllBtn.onclick = () => {
+        if(confirm('確定要刪除所有名片資料嗎？此動作無法復原。')) {
+            businessCards = [];
+            saveToLocal();
+            renderTable();
+            showToast('已清空所有名片資料');
+        }
+    };
+    
+    saveBtn.onclick = () => {
+        const name = nameInp.value.trim();
+        const company = companyInp.value.trim();
+        const phone = phoneInp.value.trim();
+        const email = emailInp.value.trim();
+        const address = addressInp.value.trim();
+        if(!name && !company && !phone && !email && !address) {
+            showToast('沒有資料可儲存',1000);
+            return;
+        }
+        businessCards.unshift({ name, company, phone, email, address, timestamp: new Date().toISOString() });
+        renderTable();
+        saveToLocal();
+        showToast('✓ 已存入名片庫');
+    };
+    
+    exportBtn.onclick = () => {
+        if(!businessCards.length) { showToast('無資料可匯出'); return; }
+        const sheetData = [["姓名","公司/職稱","電話","電子郵件","地址/網站","建立時間"]];
+        businessCards.forEach(c => sheetData.push([c.name||'', c.company||'', c.phone||'', c.email||'', c.address||'', c.timestamp?new Date(c.timestamp).toLocaleString():'']));
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "名片資料庫");
+        XLSX.writeFile(wb, `名片資料_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.xlsx`);
+        showToast('匯出成功');
+    };
+    
+    exampleBtn.onclick = () => {
+        ocrTextarea.value = `王智凱
+智凱科技顧問有限公司 執行長
+電話：0933-456-789
+Email：kai@zktech.com
+地址：台中市西屯區台灣大道三段789號12樓
+官網：www.zktech.com`;
+        showToast('已載入範例，點「智慧解析」測試');
+    };
+    
+    // 貼上按鈕（需要使用者授權）
+    pasteBtn.onclick = async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            ocrTextarea.value = text;
+            showToast('已貼上剪貼簿內容');
+        } catch(err) {
+            showToast('無法讀取剪貼簿，請手動貼上 (Ctrl+V)', 2000);
+        }
+    };
+    
+    // 開啟相機（手機上會觸發）
+    openCameraBtn.onclick = () => {
+        // 嘗試開啟相機（手機上的瀏覽器通常會詢問）
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                showToast('照片已選取，請使用 Google Lens 複製文字更精準');
+            }
+        };
+        input.click();
+    };
+    
+    loadFromLocal();
+</script>
+</body>
+</html>
